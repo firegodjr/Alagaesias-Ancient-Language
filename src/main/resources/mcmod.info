@@ -1,0 +1,16 @@
+[
+{
+"modid": "ancientlanguage",
+"name": "Alagaesia's Ancient Language",
+"description": "Cast powerful spells using the Ancient Language of Christopher Paolini's Inheritance series.",
+"version": "1.0",
+"mcversion": "${mcversion}",
+"url": "",
+"updateUrl": "",
+"authorList": ["firegodjr"],
+"credits": "Thanks to BedrockMiner for his excellent tutorials!",
+"logoFile": "",
+"screenshots": [],
+"dependencies": []
+}
+]
