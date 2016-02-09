@@ -3,6 +3,7 @@
 
 # Build and Bins
 .gradle/
+gradle/
 build/
 bin/
 out/
