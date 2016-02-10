@@ -586,7 +586,6 @@ public class WordHandler {
 				for (int z = 0; z < radius * 2 + 1; z++) {
 					relZ = z - radius;
 					trueZ = relZ + centerpoint.getZ();
-					
 					Main.getLogger().info("Checking " + trueX + ", " + trueY + ", " + trueZ + " for blocks matching " + block.getLocalizedName());
 					if(world.getBlockState(new BlockPos(trueX, trueY, trueZ)).getBlock() == block)
 					{

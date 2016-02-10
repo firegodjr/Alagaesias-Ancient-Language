@@ -84,14 +84,12 @@ public class ScriptHandler
 			{
 				wordTagged.setTag(TYPE, "livingtarget");
 				script.add(wordTagged);
-				
 				Main.getLogger().info("Found target word at args[" + i + "]");
 			}
 			else if(isBlockTarget)
 			{
 				wordTagged.setTag(TYPE, "blocktarget");
 				script.add(wordTagged);
-				
 				Main.getLogger().info("Found block target word at args[" + i + "]");
 			}
 			else if(isFromVariant)
@@ -123,7 +121,6 @@ public class ScriptHandler
 				wordTaggedSaved.setTag(MODIFIER, "colon");
 				args[i] = clearSeparators(args[i]);
 				i--;
-				
 				Main.getLogger().info("Found colon at args[" + i + "], modifying input and retrying");
 			}
 			else if(word.contains(".") || word.contains(";"))
@@ -250,7 +247,6 @@ public class ScriptHandler
 						WordHandler.performBlockAction(player, s, blockTargets);
 					}
 				}
-			
 				/*
 				 * Check for ward TODO
 				 */

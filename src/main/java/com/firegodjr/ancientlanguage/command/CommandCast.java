@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.firegodjr.ancientlanguage.Main;
+import com.firegodjr.ancientlanguage.magic.ScriptInstance;
 
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommand;
@@ -43,7 +44,7 @@ public class CommandCast implements ICommand {
 
 	@Override
 	public String getCommandUsage(ICommandSender sender) {
-		return "/cast <actions> <targets>";
+		return "/cast <action> <target>";
 	}
 
 	@Override
@@ -53,26 +54,26 @@ public class CommandCast implements ICommand {
 
 	@Override
 	public void execute(ICommandSender sender, String[] args) throws CommandException {
-
-		float fatigue = 0;
-		float distance = 0;
-
-		List<WordTagged> script = new ArrayList();
-
-		boolean success = true;
-		int wordfailed = 0;
-
-		World world = sender.getEntityWorld();
-		if(args.length == 0)
-			sender.addChatMessage(new ChatComponentText(EnumChatFormatting.GRAY + "" + EnumChatFormatting.ITALIC + "You said nothing."));
-		else
-		{
-
+		if (args.length == 0)
+			sender.addChatMessage(new ChatComponentText("No words casted!"));
+		else {
+			
+			Main.getLogger().info("Starting new ScriptHandler object");
 			ScriptHandler scriptHandler = new ScriptHandler();
-
-			EntityPlayer player = null;
+			Main.getLogger().info("Starting new ScriptInstance object");
+			ScriptInstance instance = scriptHandler.createScriptInstance(sender, args);
+			if(instance == null) {
+				Main.getLogger().info("Script instance was null");
+				return;
+			}
+			Main.getLogger().info("Entering script execution");
+			instance.onExecute(sender.getEntityWorld(), sender.getPositionVector());
+			
+			
+			/*EntityPlayer player = null;
 			if (sender.getCommandSenderEntity() instanceof EntityPlayer)
 				player = (EntityPlayer) sender.getCommandSenderEntity();
+
 			List<EntityLivingBase> targets = new ArrayList();
 
 			script = scriptHandler.getScriptFromSpell(args);
@@ -81,12 +82,18 @@ public class CommandCast implements ICommand {
 			script = scriptHandler.cleanScript(script);
 			Main.getLogger().info("Cleaned up script!");
 
-			scriptHandler.executeScript(script, player);
-			player.addChatComponentMessage(new ChatComponentText(EnumChatFormatting.GRAY + ""
+			scriptHandler.executeScript(script, player);*/
+			
+			if(sender instanceof EntityPlayer) {
+				Main.getLogger().info("Telling Player Chant");
+				EntityPlayer player = (EntityPlayer) sender;
+				player.addChatComponentMessage(new ChatComponentText(EnumChatFormatting.GRAY + ""
 					+ EnumChatFormatting.ITALIC + "You chant: \"" + EnumChatFormatting.RESET + EnumChatFormatting.AQUA
-					+ scriptHandler.getChantFromScript(script) + EnumChatFormatting.GRAY + EnumChatFormatting.ITALIC
+					+ /*scriptHandler.getChantFromScript(script)*/ scriptHandler.getScriptInstanceChant(instance) + EnumChatFormatting.GRAY + EnumChatFormatting.ITALIC
 					+ "\""));
-			Main.getLogger().info("Script Executed!");
+			}
+			Main.getLogger().info("Cast Command Executed!");
+
 		}
 	}
 
