@@ -519,8 +519,7 @@ public class WordHandler {
 	 */
 	private static EntListIterated findNearest(ICommandSender sender, int startRadius, int maxRadius) {
 		EntListIterated entList = new EntListIterated();
-		for(int i = 0; entList.isEmpty() && i <= maxRadius; i++)
-		{
+		for(int i = 0; entList.isEmpty() && i <= maxRadius; i++) {
 			Main.getLogger().info("Finding entities, iterating: " + i);
 			entList.setList(findEntitiesWithinRadius(sender, startRadius + i));
 		}

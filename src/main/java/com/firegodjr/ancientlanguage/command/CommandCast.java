@@ -55,7 +55,7 @@ public class CommandCast implements ICommand {
 	@Override
 	public void execute(ICommandSender sender, String[] args) throws CommandException {
 		if (args.length == 0)
-			sender.addChatMessage(new ChatComponentText("No words casted!"));
+			sender.addChatMessage(new ChatComponentText(EnumChatFormatting.GRAY + "" + EnumChatFormatting.ITALIC + "You said nothing."));
 		else {
 			
 			Main.getLogger().info("Starting new ScriptHandler object");

@@ -262,9 +262,7 @@ public class ScriptHandler
 						entTargets.clear();
 						blockTargets.clear();
 						actions.clear();
-					}
-					else if(component.getTag(MODIFIER).equals("comma"))
-					{
+					else if(component.getTag(MODIFIER).equals("comma")) {
 						Main.getLogger().info("Found comma");
 					}
 		}
@@ -281,7 +279,10 @@ public class ScriptHandler
 		for(int i = 0; i < script.size(); i++)
 		{
 			String word = script.get(i).getWord();
-			out += word + (script.get(i).getTag(SUBWORD) != null ? " " + script.get(i).getTag(SUBWORD) : "") + (script.get(i).getTag(MODIFIER) == "colon" ? ":" : "") + (script.get(i).getTag(MODIFIER) == "comma" ? "," : "") + (script.get(i).getTag(MODIFIER) == "separator" ? "!" : "") + (i == script.size() -1 ? "!" : " ");
+			out += word + (script.get(i).getTag(SUBWORD) != null ? " " + script.get(i).getTag(SUBWORD) : "")
+					+ (script.get(i).getTag(MODIFIER) == "colon" ? ":" : "")
+					+ (script.get(i).getTag(MODIFIER) == "comma" ? "," : "")
+					+ (script.get(i).getTag(MODIFIER) == "separator" ? "." : "") + (i == script.size() - 1 ? "!" : " ");
 		}
 
 		return out.trim();
