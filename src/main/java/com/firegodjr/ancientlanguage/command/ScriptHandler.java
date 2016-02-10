@@ -5,11 +5,10 @@ import java.util.List;
 
 import com.firegodjr.ancientlanguage.BlockPosHit;
 import com.firegodjr.ancientlanguage.EntListIterated;
-import com.firegodjr.ancientlanguage.output.ModOutput;
+import com.firegodjr.ancientlanguage.Main;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.BlockPos;
 
 public class ScriptHandler 
 {
@@ -63,11 +62,11 @@ public class ScriptHandler
 				if(wordTaggedSaved.getTag(j) == "separator" || wordTaggedSaved.getTag(j) == "comma")
 				{
 					wordTaggedSaved.clearTags();
-					ModOutput.println("Applied modifier to retried word. Clearing saved modifier.");
+					Main.getLogger().info("Applied modifier to retried word. Clearing saved modifier.");
 				}
 			}
 			
-			ModOutput.println("Adding new WordTagged from args[" + i + "]");
+			Main.getLogger().info("Adding new WordTagged from args[" + i + "]");
 			
 			WordTagged addition = new WordTagged();
 			String word = args[i];
@@ -86,40 +85,40 @@ public class ScriptHandler
 				wordTagged.setTag(TYPE, "action");
 				script.add(wordTagged);
 				
-				ModOutput.println("Found action word at args[" + i + "]");
+				Main.getLogger().info("Found action word at args[" + i + "]");
 			}
 			else if(isLivingTarget)
 			{
 				wordTagged.setTag(TYPE, "livingtarget");
 				script.add(wordTagged);
 				
-				ModOutput.println("Found target word at args[" + i + "]");
+				Main.getLogger().info("Found target word at args[" + i + "]");
 			}
 			else if(isBlockTarget)
 			{
 				wordTagged.setTag(TYPE, "blocktarget");
 				script.add(wordTagged);
 				
-				ModOutput.println("Found block target word at args[" + i + "]");
+				Main.getLogger().info("Found block target word at args[" + i + "]");
 			}
 			else if(isFromVariant)
 			{
 				wordTagged.setTag(TYPE, "fromvariant");
-				ModOutput.println("Found 'from' variant at args[" + i + "]");
+				Main.getLogger().info("Found 'from' variant at args[" + i + "]");
 				
 				if(args[i+1] != null && WordHandler.isWord(clearSeparators(args[i+1]), "wardtarget"))
 				{
 					String nextWord = args[i+1];
-					ModOutput.println("Found 'from' target at args[" + (i+1) + "]");
+					Main.getLogger().info("Found 'from' target at args[" + (i+1) + "]");
 					wordTagged.setTag(SUBWORD, clearSeparators(nextWord));
 					
 					if(nextWord.contains(":"))
 					{
 						wordTagged.setTag(MODIFIER, "colon");
-						ModOutput.println("Found colon in 'from' target");
+						Main.getLogger().info("Found colon in 'from' target");
 					}
 					
-					ModOutput.println("Found 'from' variant and target. Skipping 'from' target processing.");
+					Main.getLogger().info("Found 'from' variant and target. Skipping 'from' target processing.");
 					i++;
 				}
 				script.add(wordTagged);
@@ -130,7 +129,7 @@ public class ScriptHandler
 				args[i] = clearSeparators(args[i]);
 				i--;
 				
-				ModOutput.println("Found comma at args[" + i + "], modifying input and retrying");
+				Main.getLogger().info("Found comma at args[" + i + "], modifying input and retrying");
 			}
 			else if(word.contains(":"))
 			{
@@ -138,7 +137,7 @@ public class ScriptHandler
 				args[i] = clearSeparators(args[i]);
 				i--;
 				
-				ModOutput.println("Found colon at args[" + i + "], modifying input and retrying");
+				Main.getLogger().info("Found colon at args[" + i + "], modifying input and retrying");
 			}
 			else if(word.contains(".") || word.contains(";"))
 			{
@@ -146,11 +145,11 @@ public class ScriptHandler
 				args[i] = clearSeparators(args[i]);
 				i--;
 
-				ModOutput.println("Found separator at args[" + i + "], modifying input and retrying");
+				Main.getLogger().info("Found separator at args[" + i + "], modifying input and retrying");
 			}
 			else
 			{
-				ModOutput.println("Found invalid string at args[" + i + "]");
+				Main.getLogger().info("Found invalid string at args[" + i + "]");
 			}
 		}
 		return script;
@@ -200,21 +199,21 @@ public class ScriptHandler
 			{
 				//TODO: Add handling code for standard entities
 				//TODO: Don't add targets if they already exist in the list
-				ModOutput.println("Found living target tag at index[" + i + "]");
+				Main.getLogger().info("Found living target tag at index[" + i + "]");
 				
 				EntListIterated iteratedTargets = WordHandler.getLivingTargetsFromWord(component.getWord(), player);
 				livingTargets.addAll(iteratedTargets.getList());
 				
 				if(livingTargets.getIteration() > 3)
 				{
-					ModOutput.println("Averaging distances..."); //For distance fatigue
+					Main.getLogger().info("Averaging distances...");
 					livingTargets.setIteration((iteratedTargets.getIteration() + livingTargets.getIteration())/2);
 				}
 				
 				if(!actions.isEmpty())
 				{
-					ModOutput.println("Executable actions found. Executing with targets:");
-					ModOutput.println("          " + livingTargets);
+					Main.getLogger().info("Executable actions found. Executing with targets:");
+					Main.getLogger().info("          " + livingTargets);
 					for(String s : actions)
 						WordHandler.performEntityAction(player, s, livingTargets.getList(), iteratedTargets.getIteration());
 					/*
@@ -227,7 +226,7 @@ public class ScriptHandler
 			}
 			else if(component.getTag(TYPE).equals("blocktarget"))
 			{
-				ModOutput.println("Found block target tag at index[" + i + "]");
+				Main.getLogger().info("Found block target tag at index[" + i + "]");
 				List<BlockPosHit> blockList = WordHandler.getBlockTargetsFromWord(component.getWord(), player);
 				for(BlockPosHit bp : blockList)
 				{
@@ -236,8 +235,8 @@ public class ScriptHandler
 				
 				if(!actions.isEmpty())
 				{
-					ModOutput.println("Executable actions found. Executing with targets:");
-					ModOutput.println("          " + blockTargets);
+					Main.getLogger().info("Executable actions found. Executing with targets:");
+					Main.getLogger().info("          " + blockTargets);
 					for(String s : actions)
 						WordHandler.performBlockAction(player, s, blockTargets);
 				}
@@ -279,7 +278,7 @@ public class ScriptHandler
 			if(component.getTag(MODIFIER) != null)
 				if(component.getTag(MODIFIER).equals("separator"))
 				{
-					ModOutput.println("Separator found, clearing targets and actions.");
+					Main.getLogger().info("Separator found, clearing targets and actions.");
 					livingTargets.clear();
 					entTargets.clear();
 					blockTargets.clear();
@@ -287,7 +286,7 @@ public class ScriptHandler
 				}
 				else if(component.getTag(MODIFIER).equals("comma"))
 				{
-					ModOutput.println("Found comma");
+					Main.getLogger().info("Found comma");
 				}
 		}
 	}
@@ -317,7 +316,7 @@ public class ScriptHandler
 	private String clearSeparators(String wordIn)
 	{
 		String out = wordIn.replace('.', ' ').replace(';', ' ').replace(',', ' ').replace(':', ' ').trim();
-		ModOutput.println("Clearing any punctuation: \"" + wordIn + "\" -> \"" + out + "\"");
+		Main.getLogger().info("Clearing any punctuation: \"" + wordIn + "\" -> \"" + out + "\"");
 		return out;
 	}
 }

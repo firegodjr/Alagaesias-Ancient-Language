@@ -3,20 +3,13 @@ package com.firegodjr.ancientlanguage.command;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.firegodjr.ancientlanguage.EntListIterated;
-import com.firegodjr.ancientlanguage.output.ModOutput;
+import com.firegodjr.ancientlanguage.Main;
 
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommand;
 import net.minecraft.command.ICommandSender;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.monster.EntityCreeper;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.potion.Potion;
-import net.minecraft.potion.PotionEffect;
-import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.EnumChatFormatting;
@@ -88,14 +81,14 @@ public class CommandCast implements ICommand{
 			List<EntityLivingBase> targets = new ArrayList();
 			
 			script = scriptHandler.getScriptFromSpell(args);
-			ModOutput.println("Spell script built!");
+			Main.getLogger().info("Spell script built!");
 			
 			script = scriptHandler.cleanScript(script);
-			ModOutput.println("Cleaned up script!");
+			Main.getLogger().info("Cleaned up script!");
 			
 			scriptHandler.executeScript(script, player);
 			player.addChatComponentMessage(new ChatComponentText(EnumChatFormatting.GRAY + "" + EnumChatFormatting.ITALIC + "You chant: \"" + EnumChatFormatting.RESET + EnumChatFormatting.AQUA + scriptHandler.getChantFromScript(script) + EnumChatFormatting.GRAY + EnumChatFormatting.ITALIC + "\""));
-			ModOutput.println("Script Executed!");
+			Main.getLogger().info("Script Executed!");
 			
 		}
 	}
