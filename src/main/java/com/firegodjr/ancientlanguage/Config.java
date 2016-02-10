@@ -14,6 +14,10 @@ public class Config {
 	
 	private boolean allowWerelight;
 	
+	public Configuration getForgeConfig() {
+		return forgeConfig;
+	}
+	
 	public boolean shouldDebugOutput() {
 		return debugOutput;
 	}

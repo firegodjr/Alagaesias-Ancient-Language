@@ -26,65 +26,58 @@ public class ScriptHandler
 	 * The index of the "SUBWORD" tag
 	 */
 	private final byte SUBWORD = 3;
-	
+
 	public List<String> wardScript = new ArrayList();
-	
-	/* TYPE:
-	 * Action tag: "action"
+
+	/*
+	 * TYPE: 
+	 * Action tag: "action" 
 	 * Target tag: "target"
 	 * 
-	 * MODIFIER:
-	 * Comma tag: "comma"
-	 * Separator tag: "separator"
+	 * MODIFIER: 
+	 * Comma tag: "comma" 
+	 * Separator tag: "separator" 
 	 * Invalid tag: "invalid"
 	 */
 
-	
-	public ScriptHandler()
-	{
-		
+	public ScriptHandler() {
+
 	}
-	
+
 	/**
-	 * Takes raw spell input and converts each word to a WordTagged, all of which are outputted in an ArrayList()
+	 * Takes raw spell input and converts each word to a WordTagged, all of
+	 * which are outputted in an ArrayList()
+	 * 
 	 * @return ArrayList of WordTagged objects
 	 */
-	public List<WordTagged> getScriptFromSpell(String[] args)
-	{
+	public List<WordTagged> getScriptFromSpell(String[] args) {
 		WordTagged wordTaggedSaved = new WordTagged();
 		List<WordTagged> script = new ArrayList();
-		for(int i = 0; i < args.length; i++)
-		{
+		for (int i = 0; i < args.length; i++) {
 			WordTagged wordTagged = new WordTagged();
-			for(byte j = 0; j < wordTaggedSaved.getTags().length-1; j++)
-			{
+			for (byte j = 0; j < wordTaggedSaved.getTags().length - 1; j++) {
 				wordTagged.setTag(j, wordTaggedSaved.getTag(j));
-				if(wordTaggedSaved.getTag(j) == "separator" || wordTaggedSaved.getTag(j) == "comma")
-				{
+				if (wordTaggedSaved.getTag(j) == "separator" || wordTaggedSaved.getTag(j) == "comma") {
 					wordTaggedSaved.clearTags();
 					Main.getLogger().info("Applied modifier to retried word. Clearing saved modifier.");
 				}
 			}
-			
 			Main.getLogger().info("Adding new WordTagged from args[" + i + "]");
-			
 			WordTagged addition = new WordTagged();
 			String word = args[i];
 			boolean isAction = WordHandler.isWord(word, "action");
 			boolean isLivingTarget = WordHandler.isWord(word, "livingtarget");
 			boolean isBlockTarget = WordHandler.isWord(word, "blocktarget");
 			boolean isFromVariant = WordHandler.isWord(word, "from");
-			
+
 			wordTagged.setWord(word);
-			
+
 			/*
 			 * Begin setting tags
 			 */
-			if(isAction)
-			{
+			if (isAction) {
 				wordTagged.setTag(TYPE, "action");
 				script.add(wordTagged);
-				
 				Main.getLogger().info("Found action word at args[" + i + "]");
 			}
 			else if(isLivingTarget)
@@ -111,24 +104,18 @@ public class ScriptHandler
 					String nextWord = args[i+1];
 					Main.getLogger().info("Found 'from' target at args[" + (i+1) + "]");
 					wordTagged.setTag(SUBWORD, clearSeparators(nextWord));
-					
-					if(nextWord.contains(":"))
-					{
+					if (nextWord.contains(":")) {
 						wordTagged.setTag(MODIFIER, "colon");
 						Main.getLogger().info("Found colon in 'from' target");
 					}
-					
 					Main.getLogger().info("Found 'from' variant and target. Skipping 'from' target processing.");
 					i++;
 				}
 				script.add(wordTagged);
-			}
-			else if(word.contains(","))
-			{
+			} else if (word.contains(",")) {
 				wordTaggedSaved.setTag(MODIFIER, "comma");
 				args[i] = clearSeparators(args[i]);
 				i--;
-				
 				Main.getLogger().info("Found comma at args[" + i + "], modifying input and retrying");
 			}
 			else if(word.contains(":"))
@@ -144,7 +131,6 @@ public class ScriptHandler
 				wordTaggedSaved.setTag(MODIFIER, "separator");
 				args[i] = clearSeparators(args[i]);
 				i--;
-
 				Main.getLogger().info("Found separator at args[" + i + "], modifying input and retrying");
 			}
 			else
@@ -154,23 +140,23 @@ public class ScriptHandler
 		}
 		return script;
 	}
-	
+
 	/**
 	 * Cleans the script of null entries.
+	 * 
 	 * @param script
 	 * @return The cleaned script
 	 */
-	public List<WordTagged> cleanScript(List<WordTagged> script)
-	{
-		for(int i = 0; i < script.size(); i++)
-		{
+	public List<WordTagged> cleanScript(List<WordTagged> script) {
+		for (int i = 0; i < script.size(); i++) {
 			WordTagged word = script.get(i);
-			
-			if(word == null) //Clean any null entries
+
+			if (word == null) // Clean any null entries
 			{
 				script.remove(i);
-			}
-			else if(!WordHandler.isWord(word.getWord(), "any")) //Clean any invalid words
+			} else if (!WordHandler.isWord(word.getWord(), "any")) // Clean any
+																	// invalid
+																	// words
 			{
 				script.remove(i);
 			}
@@ -178,13 +164,11 @@ public class ScriptHandler
 		return script;
 	}
 	
-	public void executeScript(List<WordTagged> script, EntityPlayer player)
-	{
-		
+	public void executeScript(List<WordTagged> script, EntityPlayer player) {
 		EntListIterated livingTargets = new EntListIterated();
 		List<Entity> entTargets = new ArrayList();
 		List<BlockPosHit> blockTargets = new ArrayList();
-		
+
 		List<String> actions = new ArrayList();
 		if(!player.worldObj.isRemote)
 		for(int i = 0; i < script.size(); i++)
@@ -266,28 +250,27 @@ public class ScriptHandler
 						WordHandler.performBlockAction(player, s, blockTargets);
 					}
 				}
-			}
 			
-			/*
-			 * Check for ward TODO
-			 */
-			
-			/*
-			 * Apply Modifiers
-			 */
-			if(component.getTag(MODIFIER) != null)
-				if(component.getTag(MODIFIER).equals("separator"))
-				{
-					Main.getLogger().info("Separator found, clearing targets and actions.");
-					livingTargets.clear();
-					entTargets.clear();
-					blockTargets.clear();
-					actions.clear();
-				}
-				else if(component.getTag(MODIFIER).equals("comma"))
-				{
-					Main.getLogger().info("Found comma");
-				}
+				/*
+				 * Check for ward TODO
+				 */
+				
+				/*
+				 * Apply Modifiers
+				 */
+				if(component.getTag(MODIFIER) != null)
+					if(component.getTag(MODIFIER).equals("separator"))
+					{
+						Main.getLogger().info("Separator found, clearing targets and actions.");
+						livingTargets.clear();
+						entTargets.clear();
+						blockTargets.clear();
+						actions.clear();
+					}
+					else if(component.getTag(MODIFIER).equals("comma"))
+					{
+						Main.getLogger().info("Found comma");
+					}
 		}
 	}
 	
@@ -304,17 +287,18 @@ public class ScriptHandler
 			String word = script.get(i).getWord();
 			out += word + (script.get(i).getTag(SUBWORD) != null ? " " + script.get(i).getTag(SUBWORD) : "") + (script.get(i).getTag(MODIFIER) == "colon" ? ":" : "") + (script.get(i).getTag(MODIFIER) == "comma" ? "," : "") + (script.get(i).getTag(MODIFIER) == "separator" ? "!" : "") + (i == script.size() -1 ? "!" : " ");
 		}
-		
+
 		return out.trim();
 	}
-	
+
 	/**
-	 * Removes separator and other miscellaneous characters from the input String, then calls String.trim()
+	 * Removes separator and other miscellaneous characters from the input
+	 * String, then calls String.trim()
+	 * 
 	 * @param wordIn
 	 * @return
 	 */
-	private String clearSeparators(String wordIn)
-	{
+	private String clearSeparators(String wordIn) {
 		String out = wordIn.replace('.', ' ').replace(';', ' ').replace(',', ' ').replace(':', ' ').trim();
 		Main.getLogger().info("Clearing any punctuation: \"" + wordIn + "\" -> \"" + out + "\"");
 		return out;
