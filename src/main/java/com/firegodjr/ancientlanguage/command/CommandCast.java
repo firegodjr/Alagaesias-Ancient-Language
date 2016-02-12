@@ -52,7 +52,7 @@ public class CommandCast implements ICommand{
 
 	@Override
 	public String getCommandUsage(ICommandSender sender) {
-		return "/cast <action> <target>";
+		return "/cast <actions> <targets>";
 	}
 
 	@Override
@@ -75,7 +75,7 @@ public class CommandCast implements ICommand{
 		World world = sender.getEntityWorld();
 		
 		if(args.length == 0)
-			sender.addChatMessage(new ChatComponentText("No words casted!"));
+			sender.addChatMessage(new ChatComponentText(EnumChatFormatting.GRAY + "" + EnumChatFormatting.ITALIC + "You said nothing."));
 		else
 		{
 
@@ -83,7 +83,7 @@ public class CommandCast implements ICommand{
 			
 			EntityPlayer player = null;
 			if(sender.getCommandSenderEntity() instanceof EntityPlayer)
-			player = (EntityPlayer)sender.getCommandSenderEntity();
+				player = (EntityPlayer)sender.getCommandSenderEntity();
 			
 			List<EntityLivingBase> targets = new ArrayList();
 			

@@ -148,7 +148,7 @@ public class ScriptHandler
 	/**
 	 * Cleans the script of null entries.
 	 * @param script
-	 * @return
+	 * @return The cleaned script
 	 */
 	public List<WordTagged> cleanScript(List<WordTagged> script)
 	{
@@ -170,6 +170,7 @@ public class ScriptHandler
 	
 	public void executeScript(List<WordTagged> script, EntityPlayer player)
 	{
+		
 		EntListIterated livingTargets = new EntListIterated();
 		List<Entity> entTargets = new ArrayList();
 		List<BlockPosHit> blockTargets = new ArrayList();
@@ -181,7 +182,8 @@ public class ScriptHandler
 			WordTagged component = script.get(i);
 			
 			/*
-			 * Handle word types; targets and actions
+			 * Figure out what type of word this component is,
+			 * then act accordingly.
 			 */
 			if(component.getTag(TYPE).equals("livingtarget"))
 			{
@@ -194,7 +196,7 @@ public class ScriptHandler
 				
 				if(livingTargets.getIteration() > 3)
 				{
-					ModOutput.println("Averaging distances...");
+					ModOutput.println("Averaging distances..."); //For distance fatigue
 					livingTargets.setIteration((iteratedTargets.getIteration() + livingTargets.getIteration())/2);
 				}
 				
@@ -204,6 +206,12 @@ public class ScriptHandler
 					ModOutput.println("          " + livingTargets);
 					for(String s : actions)
 						WordHandler.performEntityAction(player, s, livingTargets.getList(), iteratedTargets.getIteration());
+					/*
+					 * TODO
+					 * Note that this doesn't clear the "livingTargets" or "actions" lists.
+					 * Clearing the lists requires the use of the "separator" tag
+					 * Changes may be needed to keep the syntax natural and easy to use
+					 */
 				}
 			}
 			else if(component.getTag(TYPE).equals("blocktarget"))
@@ -273,6 +281,11 @@ public class ScriptHandler
 		}
 	}
 	
+	/**
+	 * Formats a nice output for the player to see what spell was casted
+	 * @param script
+	 * @return
+	 */
 	public String getChantFromScript(List<WordTagged> script)
 	{
 		String out = "";
@@ -281,7 +294,7 @@ public class ScriptHandler
 		{
 			String word = script.get(i).getWord();
 			
-			out += word + (script.get(i).getTag(SUBWORD) != null ? " " + script.get(i).getTag(SUBWORD) : "") + (script.get(i).getTag(MODIFIER) == "colon" ? ":" : "") + (script.get(i).getTag(MODIFIER) == "comma" ? "," : "") + (script.get(i).getTag(MODIFIER) == "separator" ? "." : "") + (i == script.size() -1 ? "!" : " ");
+			out += word + (script.get(i).getTag(SUBWORD) != null ? " " + script.get(i).getTag(SUBWORD) : "") + (script.get(i).getTag(MODIFIER) == "colon" ? ":" : "") + (script.get(i).getTag(MODIFIER) == "comma" ? "," : "") + (script.get(i).getTag(MODIFIER) == "separator" ? "!" : "") + (i == script.size() -1 ? "!" : " ");
 		}
 		
 		return out.trim();
