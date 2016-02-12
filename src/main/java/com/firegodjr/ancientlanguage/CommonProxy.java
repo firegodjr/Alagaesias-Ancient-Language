@@ -4,6 +4,7 @@ import com.firegodjr.ancientlanguage.blocks.ModBlocks;
 import com.firegodjr.ancientlanguage.entities.GhostLightEntity;
 import com.firegodjr.ancientlanguage.event.LanguageEventHandler;
 import com.firegodjr.ancientlanguage.items.ModItems;
+import com.firegodjr.ancientlanguage.magic.words.WordHandler;
 import com.firegodjr.ancientlanguage.wards.RegisterWard;
 
 import net.minecraftforge.common.MinecraftForge;
@@ -21,6 +22,7 @@ public class CommonProxy {
 		ModBlocks.registerBlocks();
 		RegisterWard.RegisterWardComponents();
 		GameRegistry.registerTileEntity(GhostLightEntity.class, "nainaLightEntity");
+		WordHandler.initalizeWords();
 	}
 
 	public void init(FMLInitializationEvent e) {

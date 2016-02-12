@@ -6,7 +6,10 @@ import java.util.List;
 import com.firegodjr.ancientlanguage.BlockPosHit;
 import com.firegodjr.ancientlanguage.EntListIterated;
 import com.firegodjr.ancientlanguage.Main;
+import com.firegodjr.ancientlanguage.api.magic.IEnergyProducer;
+import com.firegodjr.ancientlanguage.magic.ScriptInstance;
 
+import joptsimple.internal.Strings;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 
@@ -42,6 +45,23 @@ public class ScriptHandler
 
 	public ScriptHandler() {
 
+	}
+	
+	public ScriptInstance createScriptInstance(Object producer, String[] args) {
+		String script = Strings.join(args, " ");
+		
+		if(producer instanceof IEnergyProducer) {
+			Main.getLogger().info("Producer was IEnergyProducer");
+			return new ScriptInstance((IEnergyProducer)producer, script);
+		} else if(producer instanceof EntityPlayer) {
+			Main.getLogger().info("Producer was Player");
+			return new ScriptInstance((EntityPlayer)producer, script);
+		} else if(producer instanceof Entity) {
+			Main.getLogger().info("Producer was Entity");
+			return new ScriptInstance((Entity)producer, script);
+		} else {
+			return null;
+		}
 	}
 
 	/**
@@ -79,28 +99,23 @@ public class ScriptHandler
 				wordTagged.setTag(TYPE, "action");
 				script.add(wordTagged);
 				Main.getLogger().info("Found action word at args[" + i + "]");
-			}
-			else if(isLivingTarget)
-			{
+			} else if (isLivingTarget) {
 				wordTagged.setTag(TYPE, "livingtarget");
 				script.add(wordTagged);
+
 				Main.getLogger().info("Found target word at args[" + i + "]");
-			}
-			else if(isBlockTarget)
-			{
+			} else if (isBlockTarget) {
 				wordTagged.setTag(TYPE, "blocktarget");
 				script.add(wordTagged);
+
 				Main.getLogger().info("Found block target word at args[" + i + "]");
-			}
-			else if(isFromVariant)
-			{
+			} else if (isFromVariant) {
 				wordTagged.setTag(TYPE, "fromvariant");
 				Main.getLogger().info("Found 'from' variant at args[" + i + "]");
-				
-				if(args[i+1] != null && WordHandler.isWord(clearSeparators(args[i+1]), "wardtarget"))
-				{
-					String nextWord = args[i+1];
-					Main.getLogger().info("Found 'from' target at args[" + (i+1) + "]");
+
+				if (args[i + 1] != null && WordHandler.isWord(clearSeparators(args[i + 1]), "wardtarget")) {
+					String nextWord = args[i + 1];
+					Main.getLogger().info("Found 'from' target at args[" + (i + 1) + "]");
 					wordTagged.setTag(SUBWORD, clearSeparators(nextWord));
 					if (nextWord.contains(":")) {
 						wordTagged.setTag(MODIFIER, "colon");
@@ -254,15 +269,14 @@ public class ScriptHandler
 				/*
 				 * Apply Modifiers
 				 */
-				if(component.getTag(MODIFIER) != null)
-					if(component.getTag(MODIFIER).equals("separator"))
-					{
+				if (component.getTag(MODIFIER) != null)
+					if (component.getTag(MODIFIER).equals("separator")) {
 						Main.getLogger().info("Separator found, clearing targets and actions.");
 						livingTargets.clear();
 						entTargets.clear();
 						blockTargets.clear();
 						actions.clear();
-					else if(component.getTag(MODIFIER).equals("comma")) {
+					} else if (component.getTag(MODIFIER).equals("comma")) {
 						Main.getLogger().info("Found comma");
 					}
 		}
@@ -286,6 +300,10 @@ public class ScriptHandler
 		}
 
 		return out.trim();
+	}
+	
+	public String getScriptInstanceChant(ScriptInstance instance) {
+		return new StringBuilder(Strings.join(instance.getChant(), " ")).append("!").toString();
 	}
 
 	/**

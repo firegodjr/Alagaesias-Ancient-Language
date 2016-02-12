@@ -32,6 +32,7 @@ import net.minecraft.util.MovingObjectPosition.MovingObjectType;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 
+@SuppressWarnings({"unused", "unchecked", "rawtypes"})
 public class WordHandler {
 
 	/**
@@ -302,12 +303,11 @@ public class WordHandler {
 			case 0: // edtha, or me
 				if (sender instanceof EntityPlayer)
 					entList.add((EntityPlayer) sender);
-				break;				
-			case 1: //nosu, or us
-				for(int i = 0; entList.isEmpty(); i++)
-				{
+				break;
+			case 1: // nosu, or us
+				for (int i = 0; entList.isEmpty(); i++) {
 					Main.getLogger().info("Nosu is iterating: " + i);
-					entList.setList(findEntitiesWithinRadius(sender, NEAR_RADIUS + i -1));
+					entList.setList(findEntitiesWithinRadius(sender, NEAR_RADIUS + i - 1));
 				}
 				if (sender instanceof EntityPlayer)
 					entList.add((EntityPlayer) sender);
@@ -335,7 +335,8 @@ public class WordHandler {
 	 * @param targetList
 	 * @param distance
 	 */
-	public static void performEntityAction(ICommandSender sender, String actionWord, List<EntityLivingBase> targetList, int distance) {
+	public static void performEntityAction(ICommandSender sender, String actionWord, List<EntityLivingBase> targetList,
+			int distance) {
 		Main.getLogger().info("Performing action \"" + actionWord + "\" against targets: " + targetList);
 		int action = getActionIndex(actionWord);
 		float fatigue = 0;
@@ -377,6 +378,14 @@ public class WordHandler {
 						}
 					}
 					Main.getLogger().info(sender.getName() + " cast vergari on target: " + targetList.get(i));
+				}
+				tirePlayer(sender, fatigue, distance);
+				break;
+
+			case 4: // brisingr, or ignite
+				for (int i = 0; i < targetList.size(); i++) {
+					fatigue = i;
+					targetList.get(i).setFire(10);
 				}
 			}
 			tirePlayer(sender, fatigue, distance);
@@ -448,8 +457,7 @@ public class WordHandler {
 				for (int i = 0; i < blockTargets.size(); i++) {
 					fatigue = i / 3;
 					BlockPosHit pos = blockTargets.get(i);
-					if(world.getBlockState(pos.pos.offset(pos.side)).getBlock() == Blocks.air)
-					{
+					if (world.getBlockState(pos.pos.offset(pos.side)).getBlock() == Blocks.air) {
 						Main.getLogger().info("Placing ghostlight!");
 						world.setBlockState(pos.pos.offset(pos.side), ModBlocks.ghostLight.getDefaultState());
 					}
@@ -519,7 +527,7 @@ public class WordHandler {
 	 */
 	private static EntListIterated findNearest(ICommandSender sender, int startRadius, int maxRadius) {
 		EntListIterated entList = new EntListIterated();
-		for(int i = 0; entList.isEmpty() && i <= maxRadius; i++) {
+		for (int i = 0; entList.isEmpty() && i <= maxRadius; i++) {
 			Main.getLogger().info("Finding entities, iterating: " + i);
 			entList.setList(findEntitiesWithinRadius(sender, startRadius + i));
 		}
@@ -538,8 +546,7 @@ public class WordHandler {
 	private static EntListIterated findNearestPlayer(ICommandSender sender, int startRadius, int maxRadius) {
 		List entList = new ArrayList();
 		EntListIterated output = new EntListIterated();
-		for(int i = 0; entList.isEmpty() || i <= maxRadius; i++)
-		{
+		for (int i = 0; entList.isEmpty() || i <= maxRadius; i++) {
 			Main.getLogger().info("Finding nearest player, iterating: " + i);
 			entList = findEntitiesWithinRadius(sender, startRadius + i);
 			output.setIteration(i);
@@ -585,30 +592,31 @@ public class WordHandler {
 				for (int z = 0; z < radius * 2 + 1; z++) {
 					relZ = z - radius;
 					trueZ = relZ + centerpoint.getZ();
-					Main.getLogger().info("Checking " + trueX + ", " + trueY + ", " + trueZ + " for blocks matching " + block.getLocalizedName());
-					if(world.getBlockState(new BlockPos(trueX, trueY, trueZ)).getBlock() == block)
-					{
+					Main.getLogger().info("Checking " + trueX + ", " + trueY + ", " + trueZ + " for blocks matching "
+							+ block.getLocalizedName());
+					if (world.getBlockState(new BlockPos(trueX, trueY, trueZ)).getBlock() == block) {
 						absX = Math.abs(relX);
 						absY = Math.abs(relY);
 						absZ = Math.abs(relZ);
 						EnumFacing face = EnumFacing.UP;
-//						if(absX > absY)
-//						{
-//							if(absX > absZ)
-//								face = relX > 0 ? EnumFacing.WEST : EnumFacing.EAST;
-//						}
-//						else if(absY > absZ)
-//						{
-//							if(absY > absX)
-//								face = relY > 0 ? EnumFacing.DOWN : EnumFacing.UP;
-//						}
-//						else if(absZ > absX)
-//						{
-//							if(absZ > absY)
-//								face = relZ > 0 ? EnumFacing.NORTH : EnumFacing.SOUTH;
-//						}
+						// if(absX > absY)
+						// {
+						// if(absX > absZ)
+						// face = relX > 0 ? EnumFacing.WEST : EnumFacing.EAST;
+						// }
+						// else if(absY > absZ)
+						// {
+						// if(absY > absX)
+						// face = relY > 0 ? EnumFacing.DOWN : EnumFacing.UP;
+						// }
+						// else if(absZ > absX)
+						// {
+						// if(absZ > absY)
+						// face = relZ > 0 ? EnumFacing.NORTH :
+						// EnumFacing.SOUTH;
+						// }
 						Main.getLogger().info("   -found matching block and calculated facing side");
-						t.add(new BlockPosHit(new BlockPos(trueX, trueY, trueZ), face));
+						out.add(new BlockPosHit(new BlockPos(trueX, trueY, trueZ), face));
 					}
 				}
 			}

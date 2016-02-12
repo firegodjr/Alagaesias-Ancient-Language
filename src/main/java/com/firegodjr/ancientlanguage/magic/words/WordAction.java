@@ -25,7 +25,7 @@ public class WordAction {
 
 	public static class ShieldWord implements IWord {
 		@Override
-		public void onStart(ScriptInstance script, List selectors) {
+		public void onUse(ScriptInstance script, List selectors) {
 			int fatigue = 0;
 			for(Object obj : selectors) {
 				if(obj instanceof EntityLivingBase) {
@@ -34,13 +34,13 @@ public class WordAction {
 					((EntityLivingBase)obj).addPotionEffect(new PotionEffect(Potion.resistance.id, 1200, 2, true, false));
 				}
 			}
-			script.getProducer().addExahustion(fatigue*20); // TODO: Balance Fatigue
+			script.getEnergy().performMagic(fatigue*20); // TODO: Balance Fatigue
 		}
 	}
 	
 	public static class BreakWord implements IWord {
 		@Override
-		public void onStart(ScriptInstance script, List selectors) {
+		public void onUse(ScriptInstance script, List selectors) {
 			int fatigue = 0;
 			for(Object obj : selectors) {
 				if(obj instanceof Entity) {
@@ -53,16 +53,16 @@ public class WordAction {
 					BlockPos pos = ((BlockPosHit)obj).pos;
 					fatigue += world.getBlockState(pos).getBlock().getBlockHardness(world, pos) / 4;
 					// Breaks blocks with break word
-					world.destroyBlock(entity.getPosition(), false);
+					world.destroyBlock(pos, false);
 				}
 			}
-			script.getProducer().addExahustion(fatigue*20); // TODO: Balance Fatigue
+			script.getEnergy().performMagic(fatigue*20); // TODO: Balance Fatigue
 		}
 	}
 	
 	public static class KillWord implements IWord {
 		@Override
-		public void onStart(ScriptInstance script, List selectors) {
+		public void onUse(ScriptInstance script, List selectors) {
 			int fatigue = 0;
 			for(Object obj : selectors) {
 				if(obj instanceof EntityLivingBase) {
@@ -83,13 +83,13 @@ public class WordAction {
 					}
 				}
 			}
-			script.getProducer().addExahustion(fatigue*20); // TODO: Balance Fatigue
+			script.getEnergy().performMagic(fatigue*20); // TODO: Balance Fatigue
 		}
 	}
 	
 	public static class FireWord implements IWord {
 		@Override
-		public void onStart(ScriptInstance script, List selectors) {
+		public void onUse(ScriptInstance script, List selectors) {
 			int fatigue = 0;
 			for(Object obj : selectors) {
 				if(obj instanceof EntityLivingBase) {
@@ -104,13 +104,13 @@ public class WordAction {
 						world.setBlockState(pos.pos.offset(pos.side), Blocks.fire.getDefaultState());
 				}
 			}
-			script.getProducer().addExahustion(fatigue*20); // TODO: Balance Fatigue
+			script.getEnergy().performMagic(fatigue*20); // TODO: Balance Fatigue
 		}
 	}
 	
 	public static class HealWord implements IWord {
 		@Override
-		public void onStart(ScriptInstance script, List selectors) {
+		public void onUse(ScriptInstance script, List selectors) {
 			int fatigue = 0;
 			for(Object obj : selectors) {
 				if(obj instanceof EntityLivingBase) {
@@ -120,13 +120,13 @@ public class WordAction {
 					ent.setHealth(ent.getHealth()+6);
 				}
 			}
-			script.getProducer().addExahustion(fatigue*20); // TODO: Balance Fatigue
+			script.getEnergy().performMagic(fatigue*20); // TODO: Balance Fatigue
 		}
 	}
 	
 	public static class HaltWord implements IWord {
 		@Override
-		public void onStart(ScriptInstance script, List selectors) {
+		public void onUse(ScriptInstance script, List selectors) {
 			int fatigue = 0;
 			for(Object obj : selectors) {
 				if(obj instanceof EntityLivingBase) {
@@ -135,13 +135,13 @@ public class WordAction {
 					((EntityLivingBase)obj).addPotionEffect(new PotionEffect(Potion.moveSlowdown.id, 200, 99, true, false));
 				}
 			}
-			script.getProducer().addExahustion(fatigue*20); // TODO: Balance Fatigue
+			script.getEnergy().performMagic(fatigue*20); // TODO: Balance Fatigue
 		}
 	}
 	
 	public static class RiseWord implements IWord {
 		@Override
-		public void onStart(ScriptInstance script, List selectors) {
+		public void onUse(ScriptInstance script, List selectors) {
 			for(Object obj : selectors) {
 				if(obj instanceof BlockPosHit && script.getActualUser() instanceof Entity) {
 					BlockPosHit pos = (BlockPosHit) obj;
@@ -160,7 +160,7 @@ public class WordAction {
 	
 	public static class BrightenWord implements IWord {
 		@Override
-		public void onStart(ScriptInstance script, List selectors) {
+		public void onUse(ScriptInstance script, List selectors) {
 			for(Object obj : selectors) {
 				if(obj instanceof BlockPosHit && script.getActualUser() instanceof Entity) {
 					BlockPosHit pos = (BlockPosHit) obj;

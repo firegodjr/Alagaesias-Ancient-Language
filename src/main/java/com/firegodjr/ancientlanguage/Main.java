@@ -35,11 +35,10 @@ public class Main {
 
 	@EventHandler
 	public void preInit(FMLPreInitializationEvent e) {
-		proxy.preInit(e);
-		
 		//Configuration file settings and variables
 		config = new Config(e); 
 		logger = e.getModLog();
+		proxy.preInit(e);
 	}
 
 	@EventHandler

@@ -2,11 +2,8 @@ package com.firegodjr.ancientlanguage.entities;
 
 import com.firegodjr.ancientlanguage.ParticleHandler;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.server.gui.IUpdatePlayerListBox;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.world.World;
 
 public class GhostLightEntity extends TileEntity implements IUpdatePlayerListBox{
 

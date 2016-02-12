@@ -1,104 +1,154 @@
 package com.firegodjr.ancientlanguage.magic;
 
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
+import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
+import com.firegodjr.ancientlanguage.Main;
 import com.firegodjr.ancientlanguage.api.magic.IEnergyProducer;
-import com.firegodjr.ancientlanguage.api.magic.IEnergyWrapper.IProducerWrapper;
+import com.firegodjr.ancientlanguage.api.script.IModifier;
+import com.firegodjr.ancientlanguage.api.script.IScriptObject;
 import com.firegodjr.ancientlanguage.api.script.ISelector;
 import com.firegodjr.ancientlanguage.api.script.IWord;
 
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 
 public final class ScriptInstance {
-	
-	private IEnergyProducer producer;
-	private List<IWord> words;
-	private Set<Integer> seperatorPositions = new HashSet<Integer>();
-	
+
+	private MagicEnergy energyStore;
+	private Object actualUser;
+	private List<IScriptObject> words;
+	private List<String> chantedWords = new ArrayList<String>();
+
 	private int currentParsePos;
-	
+	private int seperatorPos;
+
 	public ScriptInstance(IEnergyProducer producer, String script) {
+		Main.getLogger().info("Script: "+script);
 		this.words = parseScript(script);
-		this.producer = producer;
+		this.energyStore = new MagicEnergy(producer);
+		this.actualUser = producer;
+	}
+
+	public ScriptInstance(Entity producer, String script) {
+		this(Utilities.createProducerFor(producer), script);
+		this.actualUser = producer;
 	}
 	
-	@SuppressWarnings("unchecked")
-	public ScriptInstance(Object producer, String script) {
-		if(!Utilities.hasWrapper(producer.getClass())) return;
-		this.producer = Utilities.getWrapperFor(producer.getClass()).createProducerFor(producer);
-		this.words = parseScript(script);
+	public ScriptInstance(EntityPlayer producer, String script) {
+		this(Utilities.createProducerFor(producer), script);
+		this.actualUser = producer;
 	}
-	
+
 	/**
 	 * Parses script into actionable interfaces
-	 * @param script The script to parse
+	 * 
+	 * @param script
+	 *            The script to parse
 	 * @return A list of all actionable interfaces
 	 */
-	protected static List<IWord> parseScript(String script) {
-		List<IWord> parsedScript = new ArrayList<IWord>();
+	protected List<IScriptObject> parseScript(String script) {
+		Main.getLogger().info("Parsing Script");
+		List<IScriptObject> parsedScript = new ArrayList<IScriptObject>();
 		int position = 0;
 		int wordEnd = -1;
 		String word;
-		while(position != -1) {
-			if(position != 0) position++;
-			if((wordEnd = script.indexOf(' ', position)) == -1) {
+		while (position != -1) {
+			if (position != 0)
+				position++;
+			if ((wordEnd = script.indexOf(' ', position)) == -1) {
 				word = script.substring(position);
 			} else {
 				word = script.substring(position, wordEnd);
 			}
+			Main.getLogger().info("\nCurrent Position: "+position+"\nCurrent Word: "+word+"\nCurrent Word's End: "+wordEnd);
 			parsedScript.add(Utilities.getWord(word));
+			this.chantedWords.add(word);
 			position = wordEnd;
 		}
+		Main.getLogger().info("Finished Parsing Script");
 		return parsedScript;
 	}
-	
+
 	/**
 	 * Handles execution of the script
-	 * @param world The world executed in
-	 * @param position The position executed in
+	 * 
+	 * @param world
+	 *            The world executed in
+	 * @param position
+	 *            The position executed in
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void onExecute(World world, Vec3 position) {
+		Main.getLogger().info("Attempting to Execute Parsed Script");
+		//if(!world.isRemote) return;
+		Main.getLogger().info("Executing Parsed Script");
 		List selected = new ArrayList();
 		List<IWord> activeWords = new ArrayList<IWord>();
-		Iterator<IWord> it = words.iterator();
-		IWord currentWord;
-		for(currentParsePos = 0; it.hasNext(); currentParsePos++) {
-			currentWord = it.next();
-			if(currentWord instanceof ISelector) {
-				selected.addAll(((ISelector)currentWord).getSelected(this, world, position));
+		IScriptObject currentWord;
+		for (currentParsePos = 0; currentParsePos < words.size(); currentParsePos++) {
+			currentWord = words.get(currentParsePos);
+			if (currentWord instanceof ISelector) {
+				Main.getLogger().info("Selector found");
+				selected.addAll(((ISelector) currentWord).getSelected(this, world, position));
 			}
-			
-			if(this.seperatorPositions.contains(this.currentParsePos)) {
-				for(int i = 0; i < activeWords.size(); i++) activeWords.get(i).onStart(this, selected);
+
+			if (currentWord instanceof IWord) {
+				Main.getLogger().info("Action Word found");
+				activeWords.add((IWord) currentWord);
+			}
+
+			if (currentWord instanceof IModifier) {
+				Main.getLogger().info("Modifier found");
+				((IModifier) currentWord).modifyWord(this, words.get(currentParsePos - 1));
+			}
+
+			if (this.seperatorPos == this.currentParsePos || this.currentParsePos == words.size()-1) {
+				Main.getLogger().info("Reached seperator, running seperated section");
+				selected.removeAll(Collections.singleton(null));
+				activeWords.removeAll(Collections.singleton(null));
+				Main.getLogger().info("\nSelected is null: "+selected == null+
+						"\nSelected is empty"+selected.isEmpty()+"\nSelected: "+selected);
+				Main.getLogger().info("\nActive Words are null: "+activeWords == null+
+						"\nActive Words are empty: "+activeWords.isEmpty()+"\nActive Words: "+activeWords);
+				for (IWord word : activeWords)
+					word.onUse(this, selected);
+				activeWords.clear();
+				Main.getLogger().info("Active words cleared");
 			}
 		}
+		Main.getLogger().info("Script Execution finished");
 	}
-	
-	public IEnergyProducer getProducer() {
-		return this.producer;
-	}
-	
-	@SuppressWarnings("rawtypes")
+
+	/**
+	 * Retrieves Energy producing object running this script
+	 */
 	public Object getActualUser() {
-		if(this.producer instanceof IProducerWrapper) {
-			return ((IProducerWrapper)this.producer).getRepresent();
-		} else {
-			return this.producer;
-		}
+		return this.actualUser;
 	}
 	
-	public void setSeperatorIndex(int index) {
-		this.seperatorPositions.add(index);
+	public MagicEnergy getEnergy() {
+		return this.energyStore;
 	}
-	
+
+	/**
+	 * Sets separator at the current parsing position
+	 */
+	public void setSeperatorAtCurrent() {
+		this.seperatorPos = this.currentParsePos;
+	}
+
+	/**
+	 * Retrieves the current parsing position
+	 */
 	public int getCurrentPosition() {
 		return this.currentParsePos;
 	}
-	
+
+	public List<String> getChant() {
+		return this.chantedWords;
+	}
 }
