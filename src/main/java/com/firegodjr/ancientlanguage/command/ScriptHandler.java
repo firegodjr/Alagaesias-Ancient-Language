@@ -13,8 +13,19 @@ import net.minecraft.util.BlockPos;
 
 public class ScriptHandler 
 {
+	/**
+	 * The index of the "TYPE" tag
+	 */
 	private final byte TYPE = 0;
+	
+	/**
+	 * The index of the "MODIFIER" tag
+	 */
 	private final byte MODIFIER = 1;
+	
+	/**
+	 * The index of the "SUBWORD" tag
+	 */
 	private final byte SUBWORD = 3;
 	
 	public List<String> wardScript = new ArrayList();
@@ -289,11 +300,9 @@ public class ScriptHandler
 	public String getChantFromScript(List<WordTagged> script)
 	{
 		String out = "";
-		
 		for(int i = 0; i < script.size(); i++)
 		{
 			String word = script.get(i).getWord();
-			
 			out += word + (script.get(i).getTag(SUBWORD) != null ? " " + script.get(i).getTag(SUBWORD) : "") + (script.get(i).getTag(MODIFIER) == "colon" ? ":" : "") + (script.get(i).getTag(MODIFIER) == "comma" ? "," : "") + (script.get(i).getTag(MODIFIER) == "separator" ? "!" : "") + (i == script.size() -1 ? "!" : " ");
 		}
 		
