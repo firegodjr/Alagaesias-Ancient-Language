@@ -73,6 +73,7 @@ public class WordSelector {
 					
 					return false;
 				}});
+			if(list == null || list.isEmpty()) return null;
 			EntityPlayer p = list.get(list.size()-1);
 			if(p.getPositionVector().squareDistanceTo(position) > MAX_RADIUS*MAX_RADIUS) return null;
 			return p;

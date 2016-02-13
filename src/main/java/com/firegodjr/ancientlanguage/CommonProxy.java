@@ -20,7 +20,7 @@ public class CommonProxy {
 	{
 		ModItems.CreateItems();
 		ModBlocks.registerBlocks();
-		RegisterWard.RegisterWardComponents();
+		RegisterWard.registerWardComponents();
 		GameRegistry.registerTileEntity(GhostLightEntity.class, "nainaLightEntity");
 		WordHandler.initalizeWords();
 	}

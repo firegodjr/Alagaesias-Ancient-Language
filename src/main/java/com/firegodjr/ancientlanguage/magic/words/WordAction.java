@@ -3,6 +3,7 @@ package com.firegodjr.ancientlanguage.magic.words;
 import java.util.List;
 
 import com.firegodjr.ancientlanguage.BlockPosHit;
+import com.firegodjr.ancientlanguage.api.script.IWardPlacer;
 import com.firegodjr.ancientlanguage.api.script.IWord;
 import com.firegodjr.ancientlanguage.blocks.ModBlocks;
 import com.firegodjr.ancientlanguage.magic.ScriptInstance;
@@ -18,6 +19,7 @@ import net.minecraft.util.BlockPos;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 
 @SuppressWarnings("rawtypes")
@@ -173,5 +175,19 @@ public class WordAction {
 			}
 			// TODO: Fatigue
 		}		
+	}
+	
+	public static class PlaceWardWord implements IWord, IWardPlacer {
+		@Override
+		public void onUse(ScriptInstance script, List selectors) {
+			for(Object obj : selectors) {
+				if(obj instanceof BlockPosHit && script.getActualUser() instanceof Entity) {
+					BlockPosHit bph = (BlockPosHit) obj;
+					Vec3 v = new Vec3(bph.pos.getX(), bph.pos.getY(), bph.pos.getZ());
+					WordHandler.placeWard(((Entity)script.getActualUser()).worldObj, v, script.getWardlessChant(), 50);
+					return;
+				}
+			}
+		}
 	}
 }

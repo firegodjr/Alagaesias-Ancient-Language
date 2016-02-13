@@ -1,6 +1,7 @@
 package com.firegodjr.ancientlanguage.magic;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -9,8 +10,11 @@ import com.firegodjr.ancientlanguage.api.magic.IEnergyProducer;
 import com.firegodjr.ancientlanguage.api.script.IModifier;
 import com.firegodjr.ancientlanguage.api.script.IScriptObject;
 import com.firegodjr.ancientlanguage.api.script.ISelector;
+import com.firegodjr.ancientlanguage.api.script.IWardPlacer;
 import com.firegodjr.ancientlanguage.api.script.IWord;
+import com.google.common.collect.Lists;
 
+import joptsimple.internal.Strings;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.Vec3;
@@ -22,6 +26,7 @@ public final class ScriptInstance {
 	private Object actualUser;
 	private List<IScriptObject> words;
 	private List<String> chantedWords = new ArrayList<String>();
+	private List<String> wardWords = new ArrayList<String>();
 
 	private int currentParsePos;
 	private int seperatorPos;
@@ -41,6 +46,14 @@ public final class ScriptInstance {
 	public ScriptInstance(EntityPlayer producer, String script) {
 		this(Utilities.createProducerFor(producer), script);
 		this.actualUser = producer;
+	}
+	
+	public static String getStringFromArray(String[] args) {
+		return Strings.join(args, " ");
+	}
+	
+	public static String getStringFromArray(Collection<String> args) {
+		return Strings.join(new ArrayList<String>(args), " ");
 	}
 
 	/**
@@ -65,8 +78,13 @@ public final class ScriptInstance {
 				word = script.substring(position, wordEnd);
 			}
 			Main.getLogger().info("\nCurrent Position: "+position+"\nCurrent Word: "+word+"\nCurrent Word's End: "+wordEnd);
-			parsedScript.add(Utilities.getWord(word));
-			this.chantedWords.add(word);
+			IScriptObject scriptObj = Utilities.getWord(word);
+			if(scriptObj != null && parsedScript.add(scriptObj)) { 
+				this.chantedWords.add(word);
+				if(scriptObj instanceof IWardPlacer) {
+					this.wardWords.add(word);
+				}
+			}
 			position = wordEnd;
 		}
 		Main.getLogger().info("Finished Parsing Script");
@@ -93,7 +111,9 @@ public final class ScriptInstance {
 			currentWord = words.get(currentParsePos);
 			if (currentWord instanceof ISelector) {
 				Main.getLogger().info("Selector found");
-				selected.addAll(((ISelector) currentWord).getSelected(this, world, position));
+				List s = ((ISelector) currentWord).getSelected(this, world, position);
+				s.removeAll(Collections.singleton(null)); // Prevents NPEs
+				selected.addAll(s);
 			}
 
 			if (currentWord instanceof IWord) {
@@ -103,7 +123,9 @@ public final class ScriptInstance {
 
 			if (currentWord instanceof IModifier) {
 				Main.getLogger().info("Modifier found");
-				((IModifier) currentWord).modifyWord(this, words.get(currentParsePos - 1));
+				if(currentParsePos-1 > -1)
+					((IModifier) currentWord).modifyWord(this, words.get(currentParsePos - 1));
+				else Main.getLogger().info("Modifier did nothing");
 			}
 
 			if (this.seperatorPos == this.currentParsePos || this.currentParsePos == words.size()-1) {
@@ -150,5 +172,11 @@ public final class ScriptInstance {
 
 	public List<String> getChant() {
 		return this.chantedWords;
+	}
+	
+	public List<String> getWardlessChant() {
+		List<String> result = Lists.newCopyOnWriteArrayList(this.chantedWords);
+		result.removeAll(this.wardWords);
+		return result;
 	}
 }

@@ -7,7 +7,8 @@ import com.firegodjr.ancientlanguage.BlockPosHit;
 import com.firegodjr.ancientlanguage.EntListIterated;
 import com.firegodjr.ancientlanguage.Main;
 import com.firegodjr.ancientlanguage.blocks.ModBlocks;
-import com.firegodjr.ancientlanguage.wards.Ward;
+import com.firegodjr.ancientlanguage.wards.RegisterWard;
+import com.firegodjr.ancientlanguage.wards.WardBlock;
 import com.firegodjr.ancientlanguage.wards.WardEntity;
 
 import net.minecraft.block.Block;
@@ -134,8 +135,8 @@ public class WordHandler {
 		return index;
 	}
 
-	public static void placeWard(List<String> args, String target, int charge, BlockPos blockpos) {
-		ScriptHandler scriptHandler = new ScriptHandler();
+	public static void placeWard(World world, Vec3 target, List<String> args, int charge) {
+		/*ScriptHandler scriptHandler = new ScriptHandler();
 		String[] wardArgs = new String[args.size()];
 		BlockPosHit pos = new BlockPosHit(new BlockPos(0, 0, 0), EnumFacing.UP);
 		for (int i = 0; i < args.size(); i++) {
@@ -148,11 +149,14 @@ public class WordHandler {
 				break;
 			}
 		}
-		Ward ward = new Ward("wardblock");
+		WardBlock ward = new WardBlock("wardblock");
 		ward.args = args;
 		ward.target = target;
 		ward.charge = charge;
-		Minecraft.getMinecraft().theWorld.setBlockState(blockpos, ward.getDefaultState());
+		Minecraft.getMinecraft().theWorld.setBlockState(blockpos, ward.getDefaultState());*/
+		
+		// Never use Minecraft.getMinecraft() in server instances, and avoid using it to get the world, avoid at all costs
+		world.setTileEntity(new BlockPos(target), new WardEntity(args, charge));
 	}
 
 	/**
