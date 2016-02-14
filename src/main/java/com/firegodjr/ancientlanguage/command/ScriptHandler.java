@@ -13,18 +13,18 @@ import joptsimple.internal.Strings;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 
-public class ScriptHandler 
-{
+@SuppressWarnings({ "unused", "unchecked", "rawtypes" })
+public class ScriptHandler {
 	/**
 	 * The index of the "TYPE" tag
 	 */
 	private final byte TYPE = 0;
-	
+
 	/**
 	 * The index of the "MODIFIER" tag
 	 */
 	private final byte MODIFIER = 1;
-	
+
 	/**
 	 * The index of the "SUBWORD" tag
 	 */
@@ -33,32 +33,28 @@ public class ScriptHandler
 	public List<String> wardScript = new ArrayList();
 
 	/*
-	 * TYPE: 
-	 * Action tag: "action" 
-	 * Target tag: "target"
+	 * TYPE: Action tag: "action" Target tag: "target"
 	 * 
-	 * MODIFIER: 
-	 * Comma tag: "comma" 
-	 * Separator tag: "separator" 
-	 * Invalid tag: "invalid"
+	 * MODIFIER: Comma tag: "comma" Separator tag: "separator" Invalid tag:
+	 * "invalid"
 	 */
 
 	public ScriptHandler() {
 
 	}
-	
+
 	public ScriptInstance createScriptInstance(Object producer, String[] args) {
 		String script = Strings.join(args, " ");
-		
-		if(producer instanceof IEnergyProducer) {
+
+		if (producer instanceof IEnergyProducer) {
 			Main.getLogger().info("Producer was IEnergyProducer");
-			return new ScriptInstance((IEnergyProducer)producer, script);
-		} else if(producer instanceof EntityPlayer) {
+			return new ScriptInstance((IEnergyProducer) producer, script);
+		} else if (producer instanceof EntityPlayer) {
 			Main.getLogger().info("Producer was Player");
-			return new ScriptInstance((EntityPlayer)producer, script);
-		} else if(producer instanceof Entity) {
+			return new ScriptInstance((EntityPlayer) producer, script);
+		} else if (producer instanceof Entity) {
 			Main.getLogger().info("Producer was Entity");
-			return new ScriptInstance((Entity)producer, script);
+			return new ScriptInstance((Entity) producer, script);
 		} else {
 			return null;
 		}
@@ -130,23 +126,17 @@ public class ScriptHandler
 				args[i] = clearSeparators(args[i]);
 				i--;
 				Main.getLogger().info("Found comma at args[" + i + "], modifying input and retrying");
-			}
-			else if(word.contains(":"))
-			{
+			} else if (word.contains(":")) {
 				wordTaggedSaved.setTag(MODIFIER, "colon");
 				args[i] = clearSeparators(args[i]);
 				i--;
 				Main.getLogger().info("Found colon at args[" + i + "], modifying input and retrying");
-			}
-			else if(word.contains(".") || word.contains(";"))
-			{
+			} else if (word.contains(".") || word.contains(";")) {
 				wordTaggedSaved.setTag(MODIFIER, "separator");
 				args[i] = clearSeparators(args[i]);
 				i--;
 				Main.getLogger().info("Found separator at args[" + i + "], modifying input and retrying");
-			}
-			else
-			{
+			} else {
 				Main.getLogger().info("Found invalid string at args[" + i + "]");
 			}
 		}
@@ -175,123 +165,108 @@ public class ScriptHandler
 		}
 		return script;
 	}
-	
+
 	public void executeScript(List<WordTagged> script, EntityPlayer player) {
 		EntListIterated livingTargets = new EntListIterated();
 		List<Entity> entTargets = new ArrayList();
 		List<BlockPosHit> blockTargets = new ArrayList();
 
 		List<String> actions = new ArrayList();
-		if(!player.worldObj.isRemote)
-		for(int i = 0; i < script.size(); i++)
-		{
-			WordTagged component = script.get(i);
-			
-			/*
-			 * Figure out what type of word this component is,
-			 * then act accordingly.
-			 */
-			if(component.getTag(TYPE).equals("livingtarget"))
-			{
-				//TODO: Add handling code for standard entities
-				//TODO: Don't add targets if they already exist in the list
-				Main.getLogger().info("Found living target tag at index[" + i + "]");
-				
-				EntListIterated iteratedTargets = WordHandler.getLivingTargetsFromWord(component.getWord(), player);
-				livingTargets.addAll(iteratedTargets.getList());
-				
-				if(livingTargets.getIteration() > 3)
-				{
-					Main.getLogger().info("Averaging distances...");
-					livingTargets.setIteration((iteratedTargets.getIteration() + livingTargets.getIteration())/2);
-				}
-				
-				if(!actions.isEmpty())
-				{
-					Main.getLogger().info("Executable actions found. Executing with targets:");
-					Main.getLogger().info("          " + livingTargets);
-					for(String s : actions)
-						WordHandler.performEntityAction(player, s, livingTargets.getList(), iteratedTargets.getIteration());
+		if (!player.worldObj.isRemote)
+			for (int i = 0; i < script.size(); i++) {
+				WordTagged component = script.get(i);
+
+				/*
+				 * Figure out what type of word this component is, then act
+				 * accordingly.
+				 */
+				if (component.getTag(TYPE).equals("livingtarget")) {
+					// TODO: Add handling code for standard entities
+					// TODO: Don't add targets if they already exist in the list
+					Main.getLogger().info("Found living target tag at index[" + i + "]");
+
+					EntListIterated iteratedTargets = WordHandler.getLivingTargetsFromWord(component.getWord(), player);
+					livingTargets.addAll(iteratedTargets.getList());
+
+					if (livingTargets.getIteration() > 3) {
+						Main.getLogger().info("Averaging distances...");
+						livingTargets.setIteration((iteratedTargets.getIteration() + livingTargets.getIteration()) / 2);
+					}
+
+					if (!actions.isEmpty()) {
+						Main.getLogger().info("Executable actions found. Executing with targets:");
+						Main.getLogger().info("          " + livingTargets);
+						for (String s : actions)
+							WordHandler.performEntityAction(player, s, livingTargets.getList(),
+									iteratedTargets.getIteration());
+						/*
+						 * TODO Note that this doesn't clear the "livingTargets"
+						 * or "actions" lists. Clearing the lists requires the
+						 * use of the "separator" tag Changes may be needed to
+						 * keep the syntax natural and easy to use
+						 */
+					}
+				} else if (component.getTag(TYPE).equals("blocktarget")) {
+					Main.getLogger().info("Found block target tag at index[" + i + "]");
+					List<BlockPosHit> blockList = WordHandler.getBlockTargetsFromWord(component.getWord(), player);
+					for (BlockPosHit bp : blockList) {
+						blockTargets.add(bp);
+					}
+
+					if (!actions.isEmpty()) {
+						Main.getLogger().info("Executable actions found. Executing with targets:");
+						Main.getLogger().info("          " + blockTargets);
+						for (String s : actions)
+							WordHandler.performBlockAction(player, s, blockTargets);
+					}
+				} else if (component.getTag(TYPE).equals("action")) {
+					if (livingTargets.isEmpty()) {
+						actions.add(component.getWord());
+					} else {
+						actions.add(component.getWord());
+						for (String s : actions)
+							WordHandler.performEntityAction(player, s, livingTargets.getList(),
+									livingTargets.getIteration());
+					}
+
+					if (blockTargets.isEmpty()) {
+						actions.add(component.getWord());
+					} else {
+						actions.add(component.getWord());
+						for (String s : actions) {
+							WordHandler.performBlockAction(player, s, blockTargets);
+						}
+					}
 					/*
-					 * TODO
-					 * Note that this doesn't clear the "livingTargets" or "actions" lists.
-					 * Clearing the lists requires the use of the "separator" tag
-					 * Changes may be needed to keep the syntax natural and easy to use
+					 * Check for ward TODO
 					 */
+
+					/*
+					 * Apply Modifiers
+					 */
+					if (component.getTag(MODIFIER) != null)
+						if (component.getTag(MODIFIER).equals("separator")) {
+							Main.getLogger().info("Separator found, clearing targets and actions.");
+							livingTargets.clear();
+							entTargets.clear();
+							blockTargets.clear();
+							actions.clear();
+						} else if (component.getTag(MODIFIER).equals("comma")) {
+							Main.getLogger().info("Found comma");
+						}
 				}
 			}
-			else if(component.getTag(TYPE).equals("blocktarget"))
-			{
-				Main.getLogger().info("Found block target tag at index[" + i + "]");
-				List<BlockPosHit> blockList = WordHandler.getBlockTargetsFromWord(component.getWord(), player);
-				for(BlockPosHit bp : blockList)
-				{
-					blockTargets.add(bp);
-				}
-				
-				if(!actions.isEmpty())
-				{
-					Main.getLogger().info("Executable actions found. Executing with targets:");
-					Main.getLogger().info("          " + blockTargets);
-					for(String s : actions)
-						WordHandler.performBlockAction(player, s, blockTargets);
-				}
-			}
-			else if(component.getTag(TYPE).equals("action"))
-			{
-				if(livingTargets.isEmpty())
-				{
-					actions.add(component.getWord());
-				}
-				else
-				{
-					actions.add(component.getWord());
-					for(String s : actions)
-						WordHandler.performEntityAction(player, s, livingTargets.getList(), livingTargets.getIteration());
-				}
-				
-				if(blockTargets.isEmpty())
-				{
-					actions.add(component.getWord());
-				}
-				else
-				{
-					actions.add(component.getWord());
-					for(String s : actions)
-					{
-						WordHandler.performBlockAction(player, s, blockTargets);
-					}
-				}
-				/*
-				 * Check for ward TODO
-				 */
-				
-				/*
-				 * Apply Modifiers
-				 */
-				if (component.getTag(MODIFIER) != null)
-					if (component.getTag(MODIFIER).equals("separator")) {
-						Main.getLogger().info("Separator found, clearing targets and actions.");
-						livingTargets.clear();
-						entTargets.clear();
-						blockTargets.clear();
-						actions.clear();
-					} else if (component.getTag(MODIFIER).equals("comma")) {
-						Main.getLogger().info("Found comma");
-					}
-		}
 	}
-	
+
 	/**
 	 * Formats a nice output for the player to see what spell was casted
+	 * 
 	 * @param script
 	 * @return
 	 */
-	public String getChantFromScript(List<WordTagged> script)
-	{
+	public String getChantFromScript(List<WordTagged> script) {
 		String out = "";
-		for(int i = 0; i < script.size(); i++)
-		{
+		for (int i = 0; i < script.size(); i++) {
 			String word = script.get(i).getWord();
 			out += word + (script.get(i).getTag(SUBWORD) != null ? " " + script.get(i).getTag(SUBWORD) : "")
 					+ (script.get(i).getTag(MODIFIER) == "colon" ? ":" : "")
@@ -301,7 +276,7 @@ public class ScriptHandler
 
 		return out.trim();
 	}
-	
+
 	public String getScriptInstanceChant(ScriptInstance instance) {
 		return new StringBuilder(Strings.join(instance.getChant(), " ")).append("!").toString();
 	}

@@ -33,7 +33,7 @@ import net.minecraft.util.MovingObjectPosition.MovingObjectType;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 
-@SuppressWarnings({"unused", "unchecked", "rawtypes"})
+@SuppressWarnings({ "unused", "unchecked", "rawtypes" })
 public class WordHandler {
 
 	/**
@@ -55,47 +55,47 @@ public class WordHandler {
 	 * Array of action words in the Ancient Language
 	 */
 	public static final String[] actions = { 
-			"skolir", // Shield ---- 0
-			"naina", // Make Bright 1
-			"jierda", // Break ----- 2
-			"vergari", // Kill ------ 3
-			"brisingr", // Ignite ---- 4
-			"heill", // Heal ------ 5
-			"blothr", // Stop ------ 6
-			"vard", // Ward ------ 7
-			"risa" // Rise ------ 8
+			"skolir", 	// Shield ---- 0
+			"naina", 	// Make Bright 1
+			"jierda", 	// Break ----- 2
+			"vergari",	// Kill ------ 3
+			"brisingr",	// Ignite ---- 4
+			"heill", 	// Heal ------ 5
+			"blothr",	// Stop ------ 6
+			"vard", 	// Ward ------ 7
+			"risa" 		// Rise ------ 8
 	};
 
 	/**
 	 * Array of EntityLiving targeting words in the Ancient Language
 	 */
 	public static final String[] livingTargets = { 
-			"edtha", // Me --- 0
-			"nosu", // us --- 1
-			"fricai", // friend 2
-			"thorna" // those 3
+			"edtha", 	// Me --- 0
+			"nosu", 	// us --- 1
+			"fricai", 	// friend 2
+			"thorna" 	// those 3
 	};
 
 	/**
 	 * Array of Block targeting words in the Ancient Language
 	 */
 	public static final String[] blockTargets = { 
-			"sem", // That - 0
-			"stenr" // Stone 1
+			"sem", 		// That - 0
+			"stenr" 	// Stone 1
 	};
 
 	/**
 	 * Array of Ward targeting words in the Ancient Language
 	 */
-	public static final String[] wardTargets = { 
-			"fjandi", // Enemy - 0
-			"fricai", // Friend 1
-			"allr" // All --- 2
+	public static final String[] wardTargets = {
+			"fjandi", 	// Enemy - 0
+			"fricai", 	// Friend 1
+			"allr" 		// All --- 2
 	};
 
 	public static final String[] wardFromVariants = { 
-			"fra", // From - 0
-			"wiol" // For -- 1
+			"fra", 	// From - 0
+			"wiol" 	// For -- 1
 	};
 
 	/**
@@ -136,26 +136,21 @@ public class WordHandler {
 	}
 
 	public static void placeWard(World world, Vec3 target, List<String> args, int charge) {
-		/*ScriptHandler scriptHandler = new ScriptHandler();
-		String[] wardArgs = new String[args.size()];
-		BlockPosHit pos = new BlockPosHit(new BlockPos(0, 0, 0), EnumFacing.UP);
-		for (int i = 0; i < args.size(); i++) {
-			String word = args.get(i);
-			if (word.contains(":")) {
-				wardArgs[i] = word.replace(':', ' ').trim();
-				for (int j = i + 1; j < args.size(); j++) {
-					wardArgs[j] = args.get(j);
-				}
-				break;
-			}
-		}
-		WardBlock ward = new WardBlock("wardblock");
-		ward.args = args;
-		ward.target = target;
-		ward.charge = charge;
-		Minecraft.getMinecraft().theWorld.setBlockState(blockpos, ward.getDefaultState());*/
-		
-		// Never use Minecraft.getMinecraft() in server instances, and avoid using it to get the world, avoid at all costs
+		/*
+		 * ScriptHandler scriptHandler = new ScriptHandler(); String[] wardArgs
+		 * = new String[args.size()]; BlockPosHit pos = new BlockPosHit(new
+		 * BlockPos(0, 0, 0), EnumFacing.UP); for (int i = 0; i < args.size();
+		 * i++) { String word = args.get(i); if (word.contains(":")) {
+		 * wardArgs[i] = word.replace(':', ' ').trim(); for (int j = i + 1; j <
+		 * args.size(); j++) { wardArgs[j] = args.get(j); } break; } } WardBlock
+		 * ward = new WardBlock("wardblock"); ward.args = args; ward.target =
+		 * target; ward.charge = charge;
+		 * Minecraft.getMinecraft().theWorld.setBlockState(blockpos,
+		 * ward.getDefaultState());
+		 */
+
+		// Never use Minecraft.getMinecraft() in server instances, and avoid
+		// using it to get the world, avoid at all costs
 		world.setTileEntity(new BlockPos(target), new WardEntity(args, charge));
 	}
 
@@ -391,53 +386,42 @@ public class WordHandler {
 					fatigue = i;
 					targetList.get(i).setFire(10);
 				}
-			}
-			tirePlayer(sender, fatigue, distance);
-			break;
-			
-		case 4: //brisingr, or ignite
-			for(int i = 0; i < targetList.size(); i++)
-			{
-				fatigue = i;
-				targetList.get(i).setFire(10);
-			}
-			tirePlayer(sender, fatigue, distance);
-			break;
-			
-		case 5: //heill, or heal
-			for(int i = 0; i < targetList.size(); i++)
-			{
-				fatigue = i;
-				targetList.get(i).setHealth(targetList.get(i).getHealth() + 6);
-			}
-			tirePlayer(sender, fatigue, distance);
-			System.out.println("Player is tired by a factor of " + fatigue);
-			break;
-		
-		case 6: //blothr, or halt
-			for(int i = 0; i < targetList.size(); i++)
-			{
-				fatigue = i;
-				targetList.get(i).addPotionEffect(new PotionEffect(Potion.moveSlowdown.id, 200, 99, true, false));
-			}
-		tirePlayer(sender, fatigue, distance);
-		for (EntityLivingBase ent : targetList) {
-			if (ent == sender) {
+				tirePlayer(sender, fatigue, distance);
+				break;
 
-			} else if (sender instanceof EntityPlayer) {
-				EntityPlayer player = (EntityPlayer) sender;
-				player.addChatComponentMessage(new ChatComponentText(EnumChatFormatting.GRAY + ""
-						+ EnumChatFormatting.ITALIC + ent.getName() + " flinches as you say the word \""
-						+ EnumChatFormatting.RESET + EnumChatFormatting.AQUA + actionWord + EnumChatFormatting.GRAY + ""
-						+ EnumChatFormatting.ITALIC + "\"."));
+			case 5: // heill, or heal
+				for (int i = 0; i < targetList.size(); i++) {
+					fatigue = i;
+					targetList.get(i).setHealth(targetList.get(i).getHealth() + 6);
+				}
+				tirePlayer(sender, fatigue, distance);
+				System.out.println("Player is tired by a factor of " + fatigue);
+				break;
+
+			case 6: // blothr, or halt
+				for (int i = 0; i < targetList.size(); i++) {
+					fatigue = i;
+					targetList.get(i).addPotionEffect(new PotionEffect(Potion.moveSlowdown.id, 200, 99, true, false));
+				}
+				tirePlayer(sender, fatigue, distance);
+				for (EntityLivingBase ent : targetList) {
+					if (ent == sender) {
+
+					} else if (sender instanceof EntityPlayer) {
+						EntityPlayer player = (EntityPlayer) sender;
+						player.addChatComponentMessage(new ChatComponentText(EnumChatFormatting.GRAY + ""
+								+ EnumChatFormatting.ITALIC + ent.getName() + " flinches as you say the word \""
+								+ EnumChatFormatting.RESET + EnumChatFormatting.AQUA + actionWord
+								+ EnumChatFormatting.GRAY + "" + EnumChatFormatting.ITALIC + "\"."));
+					}
+					if (ent instanceof EntityPlayer) {
+						((EntityPlayer) ent).addChatComponentMessage(new ChatComponentText(EnumChatFormatting.GRAY + ""
+								+ EnumChatFormatting.ITALIC + "The word \"" + EnumChatFormatting.RESET
+								+ EnumChatFormatting.AQUA + actionWord + EnumChatFormatting.GRAY + ""
+								+ EnumChatFormatting.ITALIC + "\" echoes in your mind..."));
+					}
+				}
 			}
-			if (ent instanceof EntityPlayer) {
-				((EntityPlayer) ent).addChatComponentMessage(new ChatComponentText(EnumChatFormatting.GRAY + ""
-						+ EnumChatFormatting.ITALIC + "The word \"" + EnumChatFormatting.RESET + EnumChatFormatting.AQUA
-						+ actionWord + EnumChatFormatting.GRAY + "" + EnumChatFormatting.ITALIC
-						+ "\" echoes in your mind..."));
-			}
-		}
 	}
 
 	/**

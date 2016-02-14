@@ -10,6 +10,8 @@ import net.minecraft.entity.EntityLivingBase;
  * @author firegodjr
  *
  */
+
+@SuppressWarnings({ "unchecked", "rawtypes" })
 public class EntListIterated{
 	
 	private List<EntityLivingBase> entityList;
@@ -17,7 +19,7 @@ public class EntListIterated{
 	
 	public EntListIterated()
 	{
-		entityList = new ArrayList();
+		entityList = new ArrayList<EntityLivingBase>();
 		iterations = 0;
 	}
 	

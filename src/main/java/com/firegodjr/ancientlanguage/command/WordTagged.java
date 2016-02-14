@@ -1,8 +1,5 @@
 package com.firegodjr.ancientlanguage.command;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class WordTagged {
 	
 	private String[] tags;

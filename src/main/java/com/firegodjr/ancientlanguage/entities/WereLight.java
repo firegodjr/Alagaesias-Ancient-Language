@@ -1,18 +1,13 @@
 package com.firegodjr.ancientlanguage.entities;
 
-import com.firegodjr.ancientlanguage.Main;
-import com.firegodjr.ancientlanguage.ParticleHandler;
-import com.firegodjr.ancientlanguage.blocks.ModBlocks;
-
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
 
-
+@SuppressWarnings("unused")
 public class WereLight extends Entity{
 	
 	public EntityPlayer player;
