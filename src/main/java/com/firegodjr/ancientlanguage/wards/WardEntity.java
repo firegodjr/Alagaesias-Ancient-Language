@@ -28,7 +28,7 @@ public class WardEntity extends TileEntity implements IUpdatePlayerListBox, IEne
 	}
 	
 	public WardEntity(List<String> argsIn, int energy) {
-		script = new ScriptInstance(this, ScriptInstance.getStringFromArray(argsIn));
+		script = new ScriptInstance(this, ScriptInstance.getStringFrom(argsIn));
 		this.energy = energy;
 	}
 	
@@ -43,12 +43,12 @@ public class WardEntity extends TileEntity implements IUpdatePlayerListBox, IEne
 	}
 	
 	public WardEntity setSpell(Collection<String> spell) {
-		this.script = new ScriptInstance(this, ScriptInstance.getStringFromArray(spell));
+		this.script = new ScriptInstance(this, ScriptInstance.getStringFrom(spell));
 		return this;
 	}
 	
 	public WardEntity setSpell(String[] spell) {
-		this.script = new ScriptInstance(this, ScriptInstance.getStringFromArray(spell));
+		this.script = new ScriptInstance(this, ScriptInstance.getStringFrom(spell));
 		return this;
 	}
 	

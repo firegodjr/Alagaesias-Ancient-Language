@@ -13,7 +13,7 @@ public interface IModifier extends IScriptObject {
 	 * @param instance
 	 *            The instance of the script
 	 * @param object
-	 *            The object to modify
+	 *            The script object that comes before
 	 */
 	public void modifyWord(ScriptInstance instance, IScriptObject object);
 

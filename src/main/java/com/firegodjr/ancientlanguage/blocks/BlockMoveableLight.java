@@ -1,6 +1,6 @@
 package com.firegodjr.ancientlanguage.blocks;
 
-import com.firegodjr.ancientlanguage.entities.MoveableLightTileEntity;
+import com.firegodjr.ancientlanguage.tileentity.TileEntityMoveableLight;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.ITileEntityProvider;
@@ -18,9 +18,12 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-public class MoveableLightBlock extends Block implements ITileEntityProvider {
+/**
+ * A block to handle a moving light 
+ */
+public class BlockMoveableLight extends Block implements ITileEntityProvider {
 
-	protected MoveableLightBlock(String unlocalName, int lightLevel) {
+	protected BlockMoveableLight(String unlocalName, int lightLevel) {
 		super(Material.air);
 		setDefaultState(blockState.getBaseState());
 		setTickRandomly(false);
@@ -30,7 +33,7 @@ public class MoveableLightBlock extends Block implements ITileEntityProvider {
 
 	@Override
 	public TileEntity createNewTileEntity(World worldIn, int meta) {
-		return new MoveableLightTileEntity();
+		return new TileEntityMoveableLight();
 	}
 
 	@Override
@@ -102,8 +105,8 @@ public class MoveableLightBlock extends Block implements ITileEntityProvider {
 	protected BlockState createBlockState() {
 		return new BlockState(this);
 	}
-	
-	public boolean shouldEmit(MoveableLightTileEntity entity) {
+
+	public boolean shouldEmit(TileEntityMoveableLight entity) {
 		return true;
 	}
 }

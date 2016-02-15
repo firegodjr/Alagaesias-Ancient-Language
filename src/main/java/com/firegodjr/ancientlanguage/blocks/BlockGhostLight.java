@@ -3,7 +3,7 @@ package com.firegodjr.ancientlanguage.blocks;
 import java.util.Random;
 
 import com.firegodjr.ancientlanguage.ParticleHandler;
-import com.firegodjr.ancientlanguage.entities.GhostLightEntity;
+import com.firegodjr.ancientlanguage.tileentity.TileEntityGhostLight;
 
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.Material;
@@ -16,9 +16,9 @@ import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.World;
 
-public class GhostLight extends BlockContainer {
+public class BlockGhostLight extends BlockContainer {
 
-	public GhostLight(String unlocalizedName, Material material) {
+	public BlockGhostLight(String unlocalizedName, Material material) {
 		super(material);
 		this.setUnlocalizedName(unlocalizedName);
 		this.setLightLevel(0.9f);
@@ -26,13 +26,13 @@ public class GhostLight extends BlockContainer {
 		this.setBlockBounds(0.33F, 0.33F, 0.33F, 0.67F, 0.67F, 0.67F);
 	}
 
-	public GhostLight(String unlocalizedName) {
+	public BlockGhostLight(String unlocalizedName) {
 		this(unlocalizedName, Material.circuits);
 	}
 
 	@Override
 	public TileEntity createNewTileEntity(World worldIn, int meta) {
-		return new GhostLightEntity();
+		return new TileEntityGhostLight();
 	}
 
 	@Override

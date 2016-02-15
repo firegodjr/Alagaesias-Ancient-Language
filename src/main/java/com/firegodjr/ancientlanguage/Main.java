@@ -16,13 +16,15 @@ import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 @Mod(modid = Main.MODID, name = Main.MODNAME, version = Main.VERSION, guiFactory = Main.GUIFACORY)
 public class Main {
 	
+	//////////////////////////////////////////
 	public static final String MODID = "ancientlanguage";
 	public static final String MODNAME = "Ancient Language";
 	public static final String VERSION = "1.0";
 	public static final String GUIFACORY = "com.firegodjr.client.ModGuiFactory";
-	
+	//////////////////////////////////////////
 	public static final String CLIENTPROXY = "com.firegodjr.ancientlanguage.ClientProxy";
 	public static final String SERVERPROXY = "com.firegodjr.ancientlanguage.ServerProxy";
+	//////////////////////////////////////////
 
 	@Instance(MODID)
 	public static Main instance;
@@ -56,10 +58,17 @@ public class Main {
 		e.registerServerCommand(new CommandCast());
 	}
 	
+	/**
+	 * Retrieves config object from instance
+	 */
 	public static Config getConfig() {
 		return instance.config;
 	}
 	
+	/**
+	 * Retrieves mod specific logger
+	 * @return
+	 */
 	public static Logger getLogger() {
 		return instance.logger;
 	}

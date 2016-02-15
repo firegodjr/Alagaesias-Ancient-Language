@@ -1,9 +1,9 @@
-package com.firegodjr.ancientlanguage.entities;
+package com.firegodjr.ancientlanguage.tileentity;
 
 import java.util.Iterator;
 import java.util.List;
 
-import com.firegodjr.ancientlanguage.blocks.MoveableLightBlock;
+import com.firegodjr.ancientlanguage.blocks.BlockMoveableLight;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
@@ -14,11 +14,11 @@ import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
 
-public class MoveableLightTileEntity extends TileEntity implements IUpdatePlayerListBox {
+public class TileEntityMoveableLight extends TileEntity implements IUpdatePlayerListBox {
 
 	private Entity follow;
 
-	public MoveableLightTileEntity() {
+	public TileEntityMoveableLight() {
 	}
 
 	@Override
@@ -28,12 +28,12 @@ public class MoveableLightTileEntity extends TileEntity implements IUpdatePlayer
 
 	@Override
 	public void update() {
-		if(!follow.getPosition().equals(this.getPos())) {
+		if (!follow.getPosition().equals(this.getPos())) {
 			follow = this.findNearest();
 		}
 		Block block = worldObj.getBlockState(getPos()).getBlock();
-		if (this.follow == null || !(block instanceof MoveableLightBlock) || !((MoveableLightBlock)block).shouldEmit(this) || 
-				!this.shouldEmit()) {
+		if (this.follow == null || !(block instanceof BlockMoveableLight)
+				|| !((BlockMoveableLight) block).shouldEmit(this) || !this.shouldEmit()) {
 			worldObj.setBlockToAir(getPos());
 		}
 	}

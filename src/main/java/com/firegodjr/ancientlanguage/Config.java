@@ -14,14 +14,23 @@ public class Config {
 	
 	private boolean allowWerelight;
 	
+	/**
+	 * Retrieves the actual Forge Config class
+	 */
 	public Configuration getForgeConfig() {
 		return forgeConfig;
 	}
 	
+	/**
+	 * Returns whether debug should be output
+	 */
 	public boolean shouldDebugOutput() {
 		return debugOutput;
 	}
 	
+	/**
+	 * Whether Werelight is allowed?
+	 */
 	public boolean allowWerelight() {
 		return allowWerelight;
 	}
@@ -31,6 +40,9 @@ public class Config {
 		syncConfig();
 	}
 	
+	/**
+	 * Sync the config when changed from GUI
+	 */
 	public void syncConfig() {
 		forgeConfig.load();
 		

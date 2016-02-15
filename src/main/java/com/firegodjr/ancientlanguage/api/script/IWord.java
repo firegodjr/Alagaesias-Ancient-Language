@@ -17,6 +17,5 @@ public interface IWord extends IScriptObject {
 	 * @param selectors
 	 *            The selectors to perform check/perform tasks on
 	 */
-	@SuppressWarnings("rawtypes")
-	public void onUse(ScriptInstance script, List selectors);
+	public void onUse(ScriptInstance script, List<?> selectors);
 }
