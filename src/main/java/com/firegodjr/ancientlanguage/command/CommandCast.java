@@ -1,43 +1,23 @@
 package com.firegodjr.ancientlanguage.command;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import com.firegodjr.ancientlanguage.EntListIterated;
-import com.firegodjr.ancientlanguage.output.ModOutput;
+import com.firegodjr.ancientlanguage.Main;
+import com.firegodjr.ancientlanguage.magic.ScriptInstance;
+import com.google.common.collect.Lists;
 
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommand;
 import net.minecraft.command.ICommandSender;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.monster.EntityCreeper;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.potion.Potion;
-import net.minecraft.potion.PotionEffect;
-import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.EnumChatFormatting;
-import net.minecraft.world.World;
 
-public class CommandCast implements ICommand{
-	
-	private final int INVALID = 0;
-	private final int ACTION = 1;
-	private final int TARGET = 2;
-	private final int TILE = 3;
-	private final int SEPARATOR = -1;
-	
-	
-	private final List aliases;
-	
-	public CommandCast()
-	{
-		 aliases = new ArrayList(); 
-	        aliases.add("cast");
-	        aliases.add("c");
+//@SuppressWarnings({"unused", "rawtypes"})
+public class CommandCast implements ICommand {
+
+	public CommandCast() {
 	}
 
 	@Override
@@ -52,51 +32,37 @@ public class CommandCast implements ICommand{
 
 	@Override
 	public String getCommandUsage(ICommandSender sender) {
-		return "/cast <actions> <targets>";
+		return "/cast <action> <target>";
 	}
 
 	@Override
-	public List getAliases() {
-		return aliases;
+	public List<String> getAliases() {
+		return Lists.newArrayList("cast", "c");
 	}
 
 	@Override
-	public void execute(ICommandSender sender, String[] args) throws CommandException 
-	{
-		
-		float fatigue = 0;
-		float distance = 0;
-		
-		List<WordTagged> script = new ArrayList();
-		
-		boolean success = true;
-		int wordfailed = 0;
-		
-		World world = sender.getEntityWorld();
-		
-		if(args.length == 0)
-			sender.addChatMessage(new ChatComponentText(EnumChatFormatting.GRAY + "" + EnumChatFormatting.ITALIC + "You said nothing."));
-		else
-		{
-
-			ScriptHandler scriptHandler = new ScriptHandler();
-			
-			EntityPlayer player = null;
-			if(sender.getCommandSenderEntity() instanceof EntityPlayer)
-				player = (EntityPlayer)sender.getCommandSenderEntity();
-			
-			List<EntityLivingBase> targets = new ArrayList();
-			
-			script = scriptHandler.getScriptFromSpell(args);
-			ModOutput.println("Spell script built!");
-			
-			script = scriptHandler.cleanScript(script);
-			ModOutput.println("Cleaned up script!");
-			
-			scriptHandler.executeScript(script, player);
-			player.addChatComponentMessage(new ChatComponentText(EnumChatFormatting.GRAY + "" + EnumChatFormatting.ITALIC + "You chant: \"" + EnumChatFormatting.RESET + EnumChatFormatting.AQUA + scriptHandler.getChantFromScript(script) + EnumChatFormatting.GRAY + EnumChatFormatting.ITALIC + "\""));
-			ModOutput.println("Script Executed!");
-			
+	public void execute(ICommandSender sender, String[] args) throws CommandException {
+		if (args.length == 0)
+			sender.addChatMessage(new ChatComponentText(
+					EnumChatFormatting.GRAY.toString() + EnumChatFormatting.ITALIC + "You said nothing."));
+		else {
+			Main.getLogger().info("Starting new ScriptInstance object");
+			ScriptInstance instance = ScriptInstance.createScriptInstance(sender, args);
+			if (instance == null) {
+				Main.getLogger().info("Script instance was null");
+				return;
+			}
+			Main.getLogger().info("Entering script execution");
+			instance.onExecute(sender.getEntityWorld(), sender.getPositionVector());
+			if (sender instanceof EntityPlayer) {
+				Main.getLogger().info("Telling Player Chant");
+				EntityPlayer player = (EntityPlayer) sender;
+				player.addChatComponentMessage(
+						new ChatComponentText(EnumChatFormatting.GRAY + "" + EnumChatFormatting.ITALIC + "You chant: \""
+								+ EnumChatFormatting.RESET + EnumChatFormatting.AQUA + instance.getPrintableChant()
+								+ EnumChatFormatting.GRAY + EnumChatFormatting.ITALIC + "\""));
+			}
+			Main.getLogger().info("Cast Command Executed!");
 		}
 	}
 
@@ -106,7 +72,7 @@ public class CommandCast implements ICommand{
 	}
 
 	@Override
-	public List addTabCompletionOptions(ICommandSender sender, String[] args, BlockPos pos) {
+	public List<?> addTabCompletionOptions(ICommandSender sender, String[] args, BlockPos pos) {
 		return null;
 	}
 
@@ -114,5 +80,5 @@ public class CommandCast implements ICommand{
 	public boolean isUsernameIndex(String[] args, int index) {
 		return false;
 	}
-	
+
 }
