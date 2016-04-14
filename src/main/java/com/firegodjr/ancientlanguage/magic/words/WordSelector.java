@@ -73,18 +73,16 @@ public class WordSelector {
 					EntityPlayer player = (EntityPlayer) input;
 					if (distanceSq == -1) {
 						distanceSq = player.getPositionVector().squareDistanceTo(position);
-						return player != possiblePlayer;
+						return !player.equals(possiblePlayer);
 					}
 					double newDist = player.getPositionVector().squareDistanceTo(position);
 					if (distanceSq > newDist) {
 						distanceSq = newDist;
-						return player != possiblePlayer;
+						return!player.equals(possiblePlayer);
 					}
-
 					return false;
 				}
 			});
-			
 			if (list == null || list.isEmpty() || !(list.get(list.size() - 1) instanceof EntityPlayer))
 				return null;
 			EntityPlayer p = (EntityPlayer) list.get(list.size() - 1);
