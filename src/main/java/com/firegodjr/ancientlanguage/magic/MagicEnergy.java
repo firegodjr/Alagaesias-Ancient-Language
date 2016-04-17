@@ -9,7 +9,7 @@ public class MagicEnergy {
 
 	private IEnergyProducer producer;
 	private Object actualUser;
-	private boolean auIsSet = false;
+	private boolean auIsSet;
 
 	public MagicEnergy(IEnergyProducer producer, Object user) {
 		this.producer = producer;
@@ -19,6 +19,7 @@ public class MagicEnergy {
 
 	public MagicEnergy(IEnergyProducer producer) {
 		this(producer, producer);
+		this.auIsSet = false;
 	}
 
 	public int performMagic(int requestedEnergy) {
