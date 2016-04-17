@@ -1,5 +1,6 @@
 # Alagaesias Ancient Language
 A Minecraft mod adding in a simple recreation of the Ancient Language from the Inheritance series by Christopher Paolini.
+### [Forum Thread](http://www.minecraftforum.net/forums/mapping-and-modding/minecraft-mods/wip-mods/2544888-alagaesias-ancient-language-cast-dynamic-spells)
 
 ## Usage
 /cast \<target\> \<action\>
@@ -15,7 +16,7 @@ A Minecraft mod adding in a simple recreation of the Ancient Language from the I
 - Heill - heal - heals target entities
 - Blothr - halt - prevents target entities from moving
 - Risa - rise - throws target blocks up at a fast rate
-- Malthinae - to bind - places a ward of minimal power on the first selected block target (useless, disabled, WIP)
+- ~~Malthinae - to bind - places a ward of minimal power on the first selected block target (useless, disabled, WIP)~~
 
 ### Targeting
 
@@ -30,5 +31,5 @@ A Minecraft mod adding in a simple recreation of the Ancient Language from the I
 - Stenr - stone - targets surrounding stone
 
 ## WIP Features
-- API - Creation of words and magic implementing objects through easy API use
-- Spell Enchantments - effects assigned to an object or location which will run a spell on use
+- API - Creation and manipulation of words and magic implementing objects through an easy to use API, including event support
+- Spell Enchantments - effects assigned to an object or location which will run a spell on activation
