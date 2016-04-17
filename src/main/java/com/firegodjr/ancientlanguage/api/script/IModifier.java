@@ -1,6 +1,9 @@
 package com.firegodjr.ancientlanguage.api.script;
 
-import com.firegodjr.ancientlanguage.magic.ScriptInstance;
+import java.util.List;
+
+import com.firegodjr.ancientlanguage.magic.MagicEnergy;
+import com.firegodjr.ancientlanguage.utils.ScriptData;
 
 /**
  * A word modifier interface
@@ -8,13 +11,15 @@ import com.firegodjr.ancientlanguage.magic.ScriptInstance;
 public interface IModifier extends IScriptObject {
 
 	/**
-	 * Allows modification of word before this word
+	 * Allows modification of words in the script
 	 * 
-	 * @param instance
-	 *            The instance of the script
-	 * @param object
-	 *            The script object that comes before
+	 * @param energy
+	 *            The script object energy data
+	 * @param data
+	 *            The ScriptInstance data to check or modify
+	 * @param objects
+	 *            The script objects to be modified
 	 */
-	public void modifyWord(ScriptInstance instance, IScriptObject object);
+	public void modifyWord(MagicEnergy energy, ScriptData data, List<IScriptObject> objects);
 
 }

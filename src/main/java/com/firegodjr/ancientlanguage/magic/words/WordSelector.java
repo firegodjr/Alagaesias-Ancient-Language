@@ -3,12 +3,7 @@ package com.firegodjr.ancientlanguage.magic.words;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import com.firegodjr.ancientlanguage.Main;
-import com.firegodjr.ancientlanguage.api.script.ISelector;
-import com.firegodjr.ancientlanguage.magic.ScriptInstance;
-import com.firegodjr.ancientlanguage.utils.BlockPosHit;
-import com.google.common.base.Predicate;
+import java.util.Map;
 
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
@@ -24,6 +19,12 @@ import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 
+import com.firegodjr.ancientlanguage.Main;
+import com.firegodjr.ancientlanguage.api.script.ISelector;
+import com.firegodjr.ancientlanguage.magic.MagicEnergy;
+import com.firegodjr.ancientlanguage.utils.BlockPosHit;
+import com.google.common.base.Predicate;
+
 public class WordSelector {
 
 	/**
@@ -31,8 +32,8 @@ public class WordSelector {
 	 */
 	public static class MeSelector implements ISelector {
 		@Override
-		public List<?> getSelected(ScriptInstance script, World world, Vec3 position) {
-			return Collections.singletonList(script.getActualUser());
+		public List<?> getSelected(MagicEnergy energy, Map<String, String> modData, World world, Vec3 position) {
+			return Collections.singletonList(energy.getActualUser());
 		}
 	}
 
@@ -43,7 +44,7 @@ public class WordSelector {
 		public static final int RADIUS = 4;
 
 		@Override
-		public List<?> getSelected(ScriptInstance script, World world, Vec3 position) {
+		public List<?> getSelected(MagicEnergy energy, Map<String, String> modData, World world, Vec3 position) {
 			Vec3 pos1 = position.addVector(-RADIUS, -RADIUS / 3, -RADIUS),
 					pos2 = position.addVector(RADIUS, RADIUS / 3, RADIUS);
 			return world.getEntitiesWithinAABB(EntityLivingBase.class,
@@ -58,8 +59,8 @@ public class WordSelector {
 		public static final int MAX_RADIUS = 4;
 
 		@Override
-		public List<?> getSelected(ScriptInstance script, World world, Vec3 position) {
-			return Collections.singletonList(getClosestUnrelatedPlayer(world, script.getActualUser(), position));
+		public List<?> getSelected(MagicEnergy energy, Map<String, String> modData, World world, Vec3 position) {
+			return Collections.singletonList(getClosestUnrelatedPlayer(world, energy.getActualUser(), position));
 		}
 
 		private EntityPlayer getClosestUnrelatedPlayer(World world, final Object possiblePlayer, final Vec3 position) {
@@ -101,7 +102,7 @@ public class WordSelector {
 		public static final int RADIUS = 4;
 
 		@Override
-		public List<?> getSelected(ScriptInstance script, World world, Vec3 position) {
+		public List<?> getSelected(MagicEnergy energy, Map<String, String> modData, World world, Vec3 position) {
 			Vec3 pos1 = position.addVector(-RADIUS, -RADIUS / 3, -RADIUS),
 					pos2 = position.addVector(RADIUS, RADIUS / 3, RADIUS);
 			return world.getEntitiesWithinAABB(EntityLiving.class,
@@ -114,10 +115,10 @@ public class WordSelector {
 	 */
 	public static class ThatSelector implements ISelector {
 		@Override
-		public List<?> getSelected(ScriptInstance script, World world, Vec3 position) {
-			if (!(script.getActualUser() instanceof Entity))
+		public List<?> getSelected(MagicEnergy energy, Map<String, String> modData, World world, Vec3 position) {
+			if (!(energy.getActualUser() instanceof Entity))
 				return null;
-			Entity user = (Entity) script.getActualUser();
+			Entity user = (Entity) energy.getActualUser();
 			MovingObjectPosition pos = user.rayTrace(64, 1);
 			return Collections.singletonList(new BlockPosHit(pos.getBlockPos(), pos.sideHit));
 		}
@@ -130,8 +131,8 @@ public class WordSelector {
 		public static final int MAX_RADIUS = 2;
 
 		@Override
-		public List<?> getSelected(ScriptInstance script, World world, Vec3 position) {
-			return getAllBlockHits(script.getActualUser(), Blocks.stone);
+		public List<?> getSelected(MagicEnergy energy, Map<String, String> modData, World world, Vec3 position) {
+			return getAllBlockHits(energy.getActualUser(), Blocks.stone);
 		}
 
 		private List<BlockPosHit> getAllBlockHits(Object check, Block block) {

@@ -5,6 +5,12 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import joptsimple.internal.Strings;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.Vec3;
+import net.minecraft.world.World;
+
 import com.firegodjr.ancientlanguage.Main;
 import com.firegodjr.ancientlanguage.api.magic.IEnergyProducer;
 import com.firegodjr.ancientlanguage.api.script.IModifier;
@@ -12,14 +18,9 @@ import com.firegodjr.ancientlanguage.api.script.IScriptObject;
 import com.firegodjr.ancientlanguage.api.script.ISelector;
 import com.firegodjr.ancientlanguage.api.script.IWardPlacer;
 import com.firegodjr.ancientlanguage.api.script.IWord;
+import com.firegodjr.ancientlanguage.utils.ScriptData;
 import com.firegodjr.ancientlanguage.utils.ScriptUtils;
 import com.google.common.collect.Lists;
-
-import joptsimple.internal.Strings;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.Vec3;
-import net.minecraft.world.World;
 
 /**
  * Class for managing and executing script instances
@@ -27,10 +28,10 @@ import net.minecraft.world.World;
 public final class ScriptInstance {
 
 	private MagicEnergy energyStore;
-	private Object actualUser;
 	private List<IScriptObject> words;
 	private List<String> chantedWords = new ArrayList<String>();
 	private List<String> wardWords = new ArrayList<String>();
+	private ScriptData data;
 
 	private int currentParsePos;
 	private int seperatorPos;
@@ -39,17 +40,22 @@ public final class ScriptInstance {
 		Main.getLogger().info("Script: " + script);
 		this.words = parseScript(script);
 		this.energyStore = new MagicEnergy(producer);
-		this.actualUser = producer;
+		this.data = new ScriptData();
 	}
 
 	public ScriptInstance(Entity producer, String script) {
 		this(ScriptUtils.createProducerFor(producer), script);
-		this.actualUser = producer;
+		this.energyStore.setActualUser(producer);
 	}
 
 	public ScriptInstance(EntityPlayer producer, String script) {
 		this(ScriptUtils.createProducerFor(producer), script);
-		this.actualUser = producer;
+		this.energyStore.setActualUser(producer);
+	}
+
+	public ScriptInstance(IEnergyProducer producer, String script, ScriptData data) {
+		this(producer, script);
+		this.data = data;
 	}
 
 	/**
@@ -153,7 +159,7 @@ public final class ScriptInstance {
 			currentWord = words.get(currentParsePos);
 			if (currentWord instanceof ISelector) {
 				Main.getLogger().info("Selector found");
-				List<?> s = ((ISelector) currentWord).getSelected(this, world, position);
+				List<?> s = ((ISelector) currentWord).getSelected(this.getEnergy(), this.data.getImmutableData(currentWord), world, position);
 				s.removeAll(Collections.singleton(null)); // Prevents NPEs
 				selected.addAll(s);
 			}
@@ -166,7 +172,7 @@ public final class ScriptInstance {
 			if (currentWord instanceof IModifier) {
 				Main.getLogger().info("Modifier found");
 				if (currentParsePos - 1 > -1)
-					((IModifier) currentWord).modifyWord(this, words.get(currentParsePos - 1));
+					((IModifier) currentWord).modifyWord(this.getEnergy(), this.data, this.words);
 				else
 					Main.getLogger().info("Modifier did nothing");
 			}
@@ -180,7 +186,7 @@ public final class ScriptInstance {
 				Main.getLogger().info("Active Words are null: " + activeWords == null + ", Active Words are empty: "
 						+ activeWords.isEmpty() + ", Active Words: " + activeWords);
 				for (IWord word : activeWords)
-					word.onUse(this, selected);
+					word.onUse(this.getEnergy(), this.data.getImmutableData(word), selected);
 				activeWords.clear();
 				Main.getLogger().info("Active words cleared");
 			}
@@ -192,7 +198,7 @@ public final class ScriptInstance {
 	 * Retrieves Energy producing object running this script
 	 */
 	public Object getActualUser() {
-		return this.actualUser;
+		return this.getEnergy().getActualUser();
 	}
 
 	/**
