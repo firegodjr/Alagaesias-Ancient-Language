@@ -17,11 +17,13 @@ import com.google.common.collect.Maps;
  */
 public class ScriptData {
 
+	private Map<String, String> generalData;
 	private Map<Integer, Map<String, String>> idToDataList;
 	private List<Collection<String>> wordLocations;
 
 	public ScriptData() {
 		this.idToDataList = Maps.newHashMap();
+		this.generalData = Maps.newHashMap();
 		this.wordLocations = Lists.newArrayList();
 	}
 
@@ -31,7 +33,16 @@ public class ScriptData {
 	}
 
 	/**
-	 * Retrieves a data map for a word
+	 * Retrieves the general data information for all words
+	 */
+	public Map<String, String> getGeneralData() {
+		return this.generalData;
+	}
+
+	/**
+	 * Retrieves a data map for a word<br>
+	 * <br>
+	 * <b>Note</b>: Ignores {@link #generalData}
 	 * 
 	 * @param word
 	 *            The word to get data for
@@ -51,24 +62,31 @@ public class ScriptData {
 	}
 
 	/**
-	 * Retrieves a immutable data map for a word
+	 * Retrieves an immutable data map for a word<br>
+	 * <br>
+	 * <b>Note</b>: word specific data overrides {@link #generalData}
 	 * 
 	 * @param word
 	 *            The word to get data for
 	 */
 	public Map<String, String> getImmutableData(String word) {
-		return Collections.unmodifiableMap(this.getDataForWord(word));
+		Map<String, String> result = Maps.newHashMap(this.getDataForWord(word));
+		Map<String, String> temp = Maps.newHashMap(this.getGeneralData());
+		temp.keySet().removeAll(result.keySet());
+		result.putAll(temp);
+		return Collections.unmodifiableMap(result);
 	}
 
 	/**
-	 * Retrieves a immutable data map for a script object
+	 * Retrieves an immutable data map for a script object
+	 *
+	 * @see #getImmutableData(String)
 	 * 
 	 * @param object
 	 *            The script object to get data for
 	 */
 	public Map<String, String> getImmutableData(IScriptObject object) {
-		return this.getImmutableData(ScriptRegistry
-				.getStringForInterface(object));
+		return this.getDataForWord(ScriptRegistry.getStringForInterface(object));
 	}
 
 	/**
