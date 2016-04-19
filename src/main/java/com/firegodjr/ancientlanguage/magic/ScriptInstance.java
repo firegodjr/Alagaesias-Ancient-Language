@@ -5,6 +5,12 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import joptsimple.internal.Strings;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.Vec3;
+import net.minecraft.world.World;
+
 import com.firegodjr.ancientlanguage.Main;
 import com.firegodjr.ancientlanguage.api.magic.IEnergyProducer;
 import com.firegodjr.ancientlanguage.api.script.IModifier;
@@ -13,19 +19,15 @@ import com.firegodjr.ancientlanguage.api.script.ISelector;
 import com.firegodjr.ancientlanguage.api.script.IWardPlacer;
 import com.firegodjr.ancientlanguage.api.script.IWord;
 import com.firegodjr.ancientlanguage.utils.ScriptUtils;
+import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
-
-import joptsimple.internal.Strings;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.Vec3;
-import net.minecraft.world.World;
 
 /**
  * Class for managing and executing script instances
  */
 public final class ScriptInstance {
 
+	private String script; // Other branches can have this removed
 	private MagicEnergy energyStore;
 	private Object actualUser;
 	private List<IScriptObject> words;
@@ -40,6 +42,7 @@ public final class ScriptInstance {
 		this.words = parseScript(script);
 		this.energyStore = new MagicEnergy(producer);
 		this.actualUser = producer;
+		this.script = script;
 	}
 
 	public ScriptInstance(Entity producer, String script) {
@@ -142,11 +145,17 @@ public final class ScriptInstance {
 	 * @param position
 	 *            The position executed in
 	 */
-	public void onExecute(World world, Vec3 position) {
+	public void onExecute(World world, final Vec3 position) {
 		Main.getLogger().info("Attempting to Execute Parsed Script");
 		// if(!world.isRemote) return;
 		Main.getLogger().info("Executing Parsed Script");
-		List<Object> selected = new ArrayList<Object>();
+		@SuppressWarnings("unchecked")
+		List<Object> selected = world.getPlayers(EntityPlayer.class, new Predicate<EntityPlayer>() {
+			@Override
+			public boolean apply(EntityPlayer input) {
+				return position.squareDistanceTo(input.getPositionVector()) <= 100 && script.indexOf(input.getName()) != -1;
+			}}); // Can probably change in other branches, but will only bother when they get merged
+		if(selected == null) selected = new ArrayList<Object>();
 		List<IWord> activeWords = new ArrayList<IWord>();
 		IScriptObject currentWord;
 		for (currentParsePos = 0; currentParsePos < words.size(); currentParsePos++) {
