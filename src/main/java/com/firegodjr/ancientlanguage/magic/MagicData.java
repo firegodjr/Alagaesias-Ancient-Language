@@ -34,9 +34,11 @@ public class MagicData {
 	}
 
 	public float performMagic(float reqEnergy) {
-		if(reqEnergy > 1) reqEnergy *= this.magicMultiplier;
-		else reqEnergy = MathHelper.clamp_float(reqEnergy * this.magicMultiplier, 0, 1);
-		return this.producer.useMagic(reqEnergy);
+		return this.producer.useMagic(MathHelper.clamp_float(reqEnergy * this.magicMultiplier, 0, 1));
+	}
+
+	public float performMagic(int reqEnergy) {
+		return this.producer.useMagic(Math.max(reqEnergy * this.magicMultiplier, 1));
 	}
 
 	public Object getActualUser() {

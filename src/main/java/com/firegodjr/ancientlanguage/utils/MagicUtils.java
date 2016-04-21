@@ -33,7 +33,8 @@ public class MagicUtils {
 
 		@Override
 		public float useMagic(float energyToPull) {
-			if(energyToPull > MAX_PERCENTAGE) energyToPull *= 0.01;
+			if(energyToPull <= 0) return 0;
+			else if(energyToPull > MAX_PERCENTAGE) energyToPull *= 0.01;
 			float energyResult = 1;
 			if(entity instanceof EntityLivingBase) {
 				EntityLivingBase base = (EntityLivingBase) entity;
@@ -47,10 +48,12 @@ public class MagicUtils {
 					energyResult = 0;
 				} else energyResult = player.getRNG().nextFloat();
 			}
-			energyResult *= (MAX_HEALTH * 0.25);
-			energyResult += (energyToPull * MAX_HEALTH);
-			if(energyResult > 0) entity.attackEntityFrom(DamageSource.magic, energyResult);
-			return energyResult/MAX_HEALTH;
+			if(energyResult > 0) {
+				energyResult *= (MAX_HEALTH * 0.25);
+				energyResult += (energyToPull * MAX_HEALTH);
+				entity.attackEntityFrom(DamageSource.magic, energyResult);
+			}
+			return energyResult;
 		}
 	}
 
