@@ -3,7 +3,7 @@ package com.firegodjr.ancientlanguage.api.script;
 import java.util.List;
 import java.util.Map;
 
-import com.firegodjr.ancientlanguage.magic.MagicEnergy;
+import com.firegodjr.ancientlanguage.magic.MagicData;
 
 /**
  * An Interface for perform actions in the script
@@ -20,5 +20,5 @@ public interface IWord extends IScriptObject {
 	 * @param selectors
 	 *            The selectors to perform check/perform tasks on
 	 */
-	public void onUse(MagicEnergy energy, Map<String, String> modData, List<?> selectors);
+	public void onUse(MagicData energy, Map<String, String> modData, List<?> selectors);
 }

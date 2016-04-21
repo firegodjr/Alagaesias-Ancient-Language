@@ -21,7 +21,7 @@ import net.minecraft.world.World;
 
 import com.firegodjr.ancientlanguage.Main;
 import com.firegodjr.ancientlanguage.api.script.ISelector;
-import com.firegodjr.ancientlanguage.magic.MagicEnergy;
+import com.firegodjr.ancientlanguage.magic.MagicData;
 import com.firegodjr.ancientlanguage.utils.BlockPosHit;
 import com.google.common.base.Predicate;
 
@@ -32,7 +32,7 @@ public class WordSelector {
 	 */
 	public static class MeSelector implements ISelector {
 		@Override
-		public List<?> getSelected(MagicEnergy energy, Map<String, String> modData, World world, Vec3 position) {
+		public List<?> getSelected(MagicData energy, Map<String, String> modData, World world, Vec3 position) {
 			return Collections.singletonList(energy.getActualUser());
 		}
 	}
@@ -44,9 +44,10 @@ public class WordSelector {
 		public static final int RADIUS = 4;
 
 		@Override
-		public List<?> getSelected(MagicEnergy energy, Map<String, String> modData, World world, Vec3 position) {
+		public List<?> getSelected(MagicData energy, Map<String, String> modData, World world, Vec3 position) {
 			Vec3 pos1 = position.addVector(-RADIUS, -RADIUS / 3, -RADIUS),
 					pos2 = position.addVector(RADIUS, RADIUS / 3, RADIUS);
+			energy.addMagicMultipler(0.2f);
 			return world.getEntitiesWithinAABB(EntityLivingBase.class,
 					new AxisAlignedBB(pos1.xCoord, pos1.yCoord, pos1.zCoord, pos2.xCoord, pos2.yCoord, pos2.zCoord));
 		}
@@ -59,7 +60,7 @@ public class WordSelector {
 		public static final int MAX_RADIUS = 4;
 
 		@Override
-		public List<?> getSelected(MagicEnergy energy, Map<String, String> modData, World world, Vec3 position) {
+		public List<?> getSelected(MagicData energy, Map<String, String> modData, World world, Vec3 position) {
 			return Collections.singletonList(getClosestUnrelatedPlayer(world, energy.getActualUser(), position));
 		}
 
@@ -102,7 +103,7 @@ public class WordSelector {
 		public static final int RADIUS = 4;
 
 		@Override
-		public List<?> getSelected(MagicEnergy energy, Map<String, String> modData, World world, Vec3 position) {
+		public List<?> getSelected(MagicData energy, Map<String, String> modData, World world, Vec3 position) {
 			Vec3 pos1 = position.addVector(-RADIUS, -RADIUS / 3, -RADIUS),
 					pos2 = position.addVector(RADIUS, RADIUS / 3, RADIUS);
 			return world.getEntitiesWithinAABB(EntityLiving.class,
@@ -115,7 +116,7 @@ public class WordSelector {
 	 */
 	public static class ThatSelector implements ISelector {
 		@Override
-		public List<?> getSelected(MagicEnergy energy, Map<String, String> modData, World world, Vec3 position) {
+		public List<?> getSelected(MagicData energy, Map<String, String> modData, World world, Vec3 position) {
 			if (!(energy.getActualUser() instanceof Entity))
 				return null;
 			Entity user = (Entity) energy.getActualUser();
@@ -131,7 +132,8 @@ public class WordSelector {
 		public static final int MAX_RADIUS = 2;
 
 		@Override
-		public List<?> getSelected(MagicEnergy energy, Map<String, String> modData, World world, Vec3 position) {
+		public List<?> getSelected(MagicData energy, Map<String, String> modData, World world, Vec3 position) {
+			energy.addMagicMultipler(0.1f);
 			return getAllBlockHits(energy.getActualUser(), Blocks.stone);
 		}
 

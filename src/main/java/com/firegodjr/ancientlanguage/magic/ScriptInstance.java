@@ -19,7 +19,7 @@ import com.firegodjr.ancientlanguage.api.script.ISelector;
 import com.firegodjr.ancientlanguage.api.script.IWardPlacer;
 import com.firegodjr.ancientlanguage.api.script.IWord;
 import com.firegodjr.ancientlanguage.utils.ScriptData;
-import com.firegodjr.ancientlanguage.utils.ScriptUtils;
+import com.firegodjr.ancientlanguage.utils.MagicUtils;
 import com.google.common.collect.Lists;
 
 /**
@@ -27,7 +27,7 @@ import com.google.common.collect.Lists;
  */
 public final class ScriptInstance {
 
-	private MagicEnergy energyStore;
+	private MagicData energyStore;
 	private List<IScriptObject> words;
 	private List<String> chantedWords = new ArrayList<String>();
 	private List<String> wardWords = new ArrayList<String>();
@@ -39,17 +39,17 @@ public final class ScriptInstance {
 	public ScriptInstance(IEnergyProducer producer, String script) {
 		Main.getLogger().info("Script: " + script);
 		this.words = parseScript(script);
-		this.energyStore = new MagicEnergy(producer);
+		this.energyStore = new MagicData(producer);
 		this.data = new ScriptData();
 	}
 
 	public ScriptInstance(Entity producer, String script) {
-		this(ScriptUtils.createProducerFor(producer), script);
+		this(MagicUtils.createProducerFor(producer), script);
 		this.energyStore.setActualUser(producer);
 	}
 
 	public ScriptInstance(EntityPlayer producer, String script) {
-		this(ScriptUtils.createProducerFor(producer), script);
+		this(MagicUtils.createProducerFor(producer), script);
 		this.energyStore.setActualUser(producer);
 	}
 
@@ -171,10 +171,7 @@ public final class ScriptInstance {
 
 			if (currentWord instanceof IModifier) {
 				Main.getLogger().info("Modifier found");
-				if (currentParsePos - 1 > -1)
-					((IModifier) currentWord).modifyWord(this.getEnergy(), this.data, this.words);
-				else
-					Main.getLogger().info("Modifier did nothing");
+				((IModifier) currentWord).modifyWord(this.getEnergy(), this.data, this.words);
 			}
 
 			if (this.seperatorPos == this.currentParsePos || this.currentParsePos == words.size() - 1) {
@@ -204,7 +201,7 @@ public final class ScriptInstance {
 	/**
 	 * Retrieves the energy storage object
 	 */
-	public MagicEnergy getEnergy() {
+	public MagicData getEnergy() {
 		return this.energyStore;
 	}
 

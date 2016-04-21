@@ -2,7 +2,7 @@ package com.firegodjr.ancientlanguage.api.script;
 
 import java.util.List;
 
-import com.firegodjr.ancientlanguage.magic.MagicEnergy;
+import com.firegodjr.ancientlanguage.magic.MagicData;
 import com.firegodjr.ancientlanguage.utils.ScriptData;
 
 /**
@@ -20,6 +20,6 @@ public interface IModifier extends IScriptObject {
 	 * @param objects
 	 *            The script objects to be modified
 	 */
-	public void modifyWord(MagicEnergy energy, ScriptData data, List<IScriptObject> objects);
+	public void modifyWord(MagicData energy, ScriptData data, List<IScriptObject> objects);
 
 }
