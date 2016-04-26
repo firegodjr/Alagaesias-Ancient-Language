@@ -9,6 +9,7 @@ import net.minecraft.util.DamageSource;
 
 import com.firegodjr.ancientlanguage.Main;
 import com.firegodjr.ancientlanguage.api.magic.IEnergyProducer;
+import com.firegodjr.ancientlanguage.entity.properties.ExtPropMagicExperience;
 
 /**
  * A Magic Utility Helper Class
@@ -35,6 +36,8 @@ public class MagicUtils {
 		public float useMagic(float energyToPull) {
 			if(energyToPull <= 0) return 0;
 			else if(energyToPull > MAX_PERCENTAGE) energyToPull *= 0.01;
+			ExtPropMagicExperience prop = ExtPropMagicExperience.getExtProp(this.entity);
+			if(prop != null) energyToPull /= prop.getLevel();
 			float energyResult = 1;
 			if(entity instanceof EntityLivingBase) {
 				EntityLivingBase base = (EntityLivingBase) entity;
@@ -53,6 +56,7 @@ public class MagicUtils {
 				energyResult += (energyToPull * MAX_HEALTH);
 				entity.attackEntityFrom(DamageSource.magic, energyResult);
 			}
+			if(prop != null) prop.addExperience(energyToPull);
 			return energyResult;
 		}
 	}

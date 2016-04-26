@@ -12,7 +12,7 @@ run/*
 .classpath
 .project
 .settings/
-eclipse/
+minecraft/
 .idea/
 *.iml
 *.ipr

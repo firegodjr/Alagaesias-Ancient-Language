@@ -2,20 +2,19 @@ package com.firegodjr.ancientlanguage.command;
 
 import java.util.List;
 
-import com.firegodjr.ancientlanguage.Main;
-import com.firegodjr.ancientlanguage.magic.ScriptInstance;
-import com.google.common.collect.Lists;
-
+import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
-import net.minecraft.command.ICommand;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.EnumChatFormatting;
 
-//@SuppressWarnings({"unused", "rawtypes"})
-public class CommandCast implements ICommand {
+import com.firegodjr.ancientlanguage.Main;
+import com.firegodjr.ancientlanguage.magic.ScriptInstance;
+import com.google.common.collect.Lists;
+
+public class CommandCast extends CommandBase {
 
 	public CommandCast() {
 	}
@@ -37,7 +36,7 @@ public class CommandCast implements ICommand {
 
 	@Override
 	public List<String> getAliases() {
-		return Lists.newArrayList("cast", "c");
+		return Lists.newArrayList("c", "aal.cast", "aal.c");
 	}
 
 	@Override
