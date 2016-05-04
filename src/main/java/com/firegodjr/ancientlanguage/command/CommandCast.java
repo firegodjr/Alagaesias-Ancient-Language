@@ -13,6 +13,7 @@ import net.minecraft.util.EnumChatFormatting;
 
 import com.firegodjr.ancientlanguage.Main;
 import com.firegodjr.ancientlanguage.magic.ScriptInstance;
+import com.firegodjr.ancientlanguage.magic.ScriptRegistry;
 import com.google.common.collect.Lists;
 
 public class CommandCast extends CommandBase {
@@ -73,7 +74,13 @@ public class CommandCast extends CommandBase {
 
 	@Override
 	public List<?> addTabCompletionOptions(ICommandSender sender, String[] args, BlockPos pos) {
-		return getListOfStringsMatchingLastWord(args, MinecraftServer.getServer().getAllUsernames());
+		return getListOfStringsMatchingLastWord(args, this.getTabPossibilities());
+	}
+
+	public String[] getTabPossibilities() {
+		List<String> result = Lists.newArrayList(MinecraftServer.getServer().getAllUsernames());
+		result.addAll(ScriptRegistry.getAllWords());
+		return result.toArray(new String[result.size()]);
 	}
 
 	@Override
