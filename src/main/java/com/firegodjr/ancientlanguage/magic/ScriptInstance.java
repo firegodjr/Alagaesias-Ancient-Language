@@ -18,8 +18,9 @@ import com.firegodjr.ancientlanguage.api.script.IScriptObject;
 import com.firegodjr.ancientlanguage.api.script.ISelector;
 import com.firegodjr.ancientlanguage.api.script.IWardPlacer;
 import com.firegodjr.ancientlanguage.api.script.IWord;
-import com.firegodjr.ancientlanguage.utils.ScriptData;
 import com.firegodjr.ancientlanguage.utils.MagicUtils;
+import com.firegodjr.ancientlanguage.utils.ModHooks;
+import com.firegodjr.ancientlanguage.utils.ScriptData;
 import com.google.common.collect.Lists;
 
 /**
@@ -28,6 +29,7 @@ import com.google.common.collect.Lists;
 public final class ScriptInstance {
 
 	private MagicData energyStore;
+	private String originalScript;
 	private List<IScriptObject> words;
 	private List<String> chantedWords = new ArrayList<String>();
 	private List<String> wardWords = new ArrayList<String>();
@@ -38,6 +40,7 @@ public final class ScriptInstance {
 
 	public ScriptInstance(IEnergyProducer producer, String script) {
 		Main.getLogger().info("Script: " + script);
+		this.originalScript = script;
 		this.words = parseScript(script);
 		this.energyStore = new MagicData(producer);
 		this.data = new ScriptData();
@@ -112,6 +115,7 @@ public final class ScriptInstance {
 	 * @return A list of all actionable interfaces
 	 */
 	protected List<IScriptObject> parseScript(String script) {
+		if(!ModHooks.onPreParse(this, script)) return Lists.newArrayList();
 		Main.getLogger().info("Parsing Script");
 		List<IScriptObject> parsedScript = new ArrayList<IScriptObject>();
 		int position = 0;
@@ -137,6 +141,7 @@ public final class ScriptInstance {
 			position = wordEnd;
 		}
 		Main.getLogger().info("Finished Parsing Script");
+		if(!ModHooks.onPostParse(this, script, parsedScript)) return Lists.newArrayList();
 		return parsedScript;
 	}
 
@@ -158,20 +163,26 @@ public final class ScriptInstance {
 		for (currentParsePos = 0; currentParsePos < words.size(); currentParsePos++) {
 			currentWord = words.get(currentParsePos);
 			if (currentWord instanceof ISelector) {
+				ISelector selector = (ISelector) currentWord;
+				if(!ModHooks.onTypeActivation(this, this.originalScript, this.words, selector, this.chantedWords.get(currentParsePos))) continue;
 				Main.getLogger().info("Selector found");
-				List<?> s = ((ISelector) currentWord).getSelected(this.getEnergy(), this.data.getImmutableData(currentWord), world, position);
+				List<?> s = selector.getSelected(this.getEnergy(), this.data.getImmutableData(selector), world, position);
 				s.removeAll(Collections.singleton(null)); // Prevents NPEs
 				selected.addAll(s);
 			}
 
 			if (currentWord instanceof IWord) {
+				IWord action = (IWord) currentWord;
+				if(!ModHooks.onTypeActivation(this, this.originalScript, this.words, action, this.chantedWords.get(currentParsePos))) continue;
 				Main.getLogger().info("Action Word found");
-				activeWords.add((IWord) currentWord);
+				activeWords.add(action);
 			}
 
 			if (currentWord instanceof IModifier) {
+				IModifier mod = (IModifier) currentWord;
+				if(!ModHooks.onTypeActivation(this, this.originalScript, this.words, mod, this.chantedWords.get(currentParsePos))) continue;
 				Main.getLogger().info("Modifier found");
-				((IModifier) currentWord).modifyWord(this.getEnergy(), this.data, this.words);
+				mod.modifyWord(this.getEnergy(), this.data, this.words);
 			}
 
 			if (this.seperatorPos == this.currentParsePos || this.currentParsePos == words.size() - 1) {
@@ -189,6 +200,7 @@ public final class ScriptInstance {
 			}
 		}
 		Main.getLogger().info("Script Execution finished");
+		ModHooks.onScriptEnd(this, this.originalScript, this.words);
 	}
 
 	/**
