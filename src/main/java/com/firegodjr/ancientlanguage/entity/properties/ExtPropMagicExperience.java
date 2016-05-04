@@ -76,6 +76,14 @@ public final class ExtPropMagicExperience implements IExtendedEntityProperties {
 			this.currentLevel++;
 			this.exp -= 1;
 		}
+		if(this.exp == -0) { // Prevent negative zero, it just looks weird later and adds random sign for no reason
+			this.exp = 0;
+			return;
+		}
+		while (this.exp < 0) {
+			this.currentLevel--;
+			this.exp += 1;
+		}
 	}
 
 	public void setLevel(int level) {
