@@ -50,8 +50,15 @@ public class CommandExp extends CommandBase {
 				if (args.length == 2) {
 					throw new WrongUsageException("Usage: " + this.getCommandUsage(sender), new Object[0]);
 				}
-				if ("add".equals(args[1])) prop.addExperience((float) (parseDouble(args[2], 0) * 0.01));
-				if ("set".equals(args[1])) prop.setExperience((float) (parseDouble(args[2], 0) * 0.01));
+				if (args[2].endsWith("L") || args[2].endsWith("l")) {
+					args[2] = args[2].substring(0, args[2].length()-1);
+					if ("add".equals(args[1])) prop.setLevel(parseInt(args[2], 0) + prop.getLevel());
+					if ("set".equals(args[1])) prop.setLevel(parseInt(args[2], 0));
+				}
+				else {
+					if ("add".equals(args[1])) prop.addExperience((float) (parseDouble(args[2]) * 0.01));
+					if ("set".equals(args[1])) prop.setExperience((float) (parseDouble(args[2], 0) * 0.01));
+				}
 			}
 			processEntity(sender, prop);
 		}

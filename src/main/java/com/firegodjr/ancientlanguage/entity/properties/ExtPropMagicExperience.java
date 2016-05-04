@@ -21,14 +21,14 @@ public final class ExtPropMagicExperience implements IExtendedEntityProperties {
 
 	@Override
 	public void saveNBTData(NBTTagCompound compound) {
-		compound.setFloat(EXP_NBT, this.exp);
-		compound.setInteger(CURRENTLEVEL_NBT, this.currentLevel);
+		compound.setFloat(EXP_NBT, this.getExperience());
+		compound.setInteger(CURRENTLEVEL_NBT, this.getLevel());
 	}
 
 	@Override
 	public void loadNBTData(NBTTagCompound compound) {
-		this.exp = compound.getFloat(EXP_NBT);
-		this.currentLevel = compound.getInteger(CURRENTLEVEL_NBT);
+		this.setExperience(compound.getFloat(EXP_NBT));
+		this.setLevel(compound.getInteger(CURRENTLEVEL_NBT));
 	}
 
 	@Override
@@ -54,6 +54,14 @@ public final class ExtPropMagicExperience implements IExtendedEntityProperties {
 			this.currentLevel++;
 			this.exp -= 1;
 		}
+		if(this.exp == -0) { // Prevent negative zero, it just looks weird later and adds random sign for no reason
+			this.exp = 0;
+			return;
+		}
+		while (this.exp < 0) {
+			this.currentLevel--;
+			this.exp += 1;
+		}
 	}
 
 	/**
@@ -68,6 +76,10 @@ public final class ExtPropMagicExperience implements IExtendedEntityProperties {
 			this.currentLevel++;
 			this.exp -= 1;
 		}
+	}
+
+	public void setLevel(int level) {
+		this.currentLevel = Math.max(1, level);
 	}
 
 	/**
