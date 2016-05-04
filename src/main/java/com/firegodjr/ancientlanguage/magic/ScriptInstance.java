@@ -174,8 +174,10 @@ public final class ScriptInstance {
 				if(!ModHooks.onTypeActivation(this, this.originalScript, this.words, selector, this.chantedWords.get(currentParsePos))) continue;
 				Main.getLogger().info("Selector found");
 				List<?> s = selector.getSelected(this.getEnergy(), this.data.getImmutableData(selector), world, position);
-				s.removeAll(Collections.singleton(null)); // Prevents NPEs
-				selected.addAll(s);
+				if(s != null) {
+					s.removeAll(Collections.singleton(null)); // Prevents NPEs
+					selected.addAll(s);
+				}
 			}
 
 			if (currentWord instanceof IWord) {
