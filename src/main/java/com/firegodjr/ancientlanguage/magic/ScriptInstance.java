@@ -21,6 +21,7 @@ import com.firegodjr.ancientlanguage.api.script.IWord;
 import com.firegodjr.ancientlanguage.utils.MagicUtils;
 import com.firegodjr.ancientlanguage.utils.ModHooks;
 import com.firegodjr.ancientlanguage.utils.ScriptData;
+import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
 
 /**
@@ -153,11 +154,17 @@ public final class ScriptInstance {
 	 * @param position
 	 *            The position executed in
 	 */
-	public void onExecute(World world, Vec3 position) {
+	public void onExecute(World world, final Vec3 position) {
 		Main.getLogger().info("Attempting to Execute Parsed Script");
 		// if(!world.isRemote) return;
 		Main.getLogger().info("Executing Parsed Script");
-		List<Object> selected = new ArrayList<Object>();
+		@SuppressWarnings("unchecked")
+		List<Object> selected = world.getPlayers(EntityPlayer.class, new Predicate<EntityPlayer>() {
+			@Override
+			public boolean apply(EntityPlayer input) {
+				return position.squareDistanceTo(input.getPositionVector()) <= 100 && originalScript.indexOf(input.getName()) != -1;
+			}}); // Can probably change in other branches, but will only bother when they get merged
+		if(selected == null) selected = new ArrayList<Object>();
 		List<IWord> activeWords = new ArrayList<IWord>();
 		IScriptObject currentWord;
 		for (currentParsePos = 0; currentParsePos < words.size(); currentParsePos++) {
