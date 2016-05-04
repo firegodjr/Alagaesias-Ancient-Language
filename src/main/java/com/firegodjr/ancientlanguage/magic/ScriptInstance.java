@@ -154,8 +154,10 @@ public final class ScriptInstance {
 			if (currentWord instanceof ISelector) {
 				Main.getLogger().info("Selector found");
 				List<?> s = ((ISelector) currentWord).getSelected(this, world, position);
-				s.removeAll(Collections.singleton(null)); // Prevents NPEs
-				selected.addAll(s);
+				if(s != null) {
+					s.removeAll(Collections.singleton(null)); // Prevents NPEs
+					selected.addAll(s);
+				}
 			}
 
 			if (currentWord instanceof IWord) {
