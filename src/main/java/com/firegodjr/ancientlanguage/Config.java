@@ -20,7 +20,7 @@ public class Config {
 	private boolean allowWerelight;
 	private List<String> usernameDescovers = Lists.newArrayList();
 
-	private static final Pattern descoverRegex = Pattern.compile("[^\\][\\][^\\]");
+	private static final Pattern descoverRegex = Pattern.compile("[^\\\\][\\\\][^\\\\]");
 
 	/**
 	 * Retrieves the actual Forge Config class
@@ -51,7 +51,10 @@ public class Config {
 		for(String s : this.usernameDescovers) {
 			sIndex = string.indexOf(s.charAt(0));
 			eIndex = string.indexOf(s.charAt(1));
-			if(sIndex != -1 && eIndex != -1) return string.substring(sIndex+1, eIndex);
+			if(sIndex != -1) {
+				if (s.charAt(1) == 0) return string.substring(sIndex+1, string.length());
+				else if (eIndex != -1) return string.substring(sIndex+1, eIndex);
+			}
 		}
 		return "";
 	}
@@ -63,9 +66,12 @@ public class Config {
 
 	private void parseDescoverString(String string) {
 		this.usernameDescovers.clear();
+		int start = 0;
 		Matcher m = descoverRegex.matcher(string);
-		for(int i = 1; i <= m.groupCount(); i++)
-			this.usernameDescovers.add(m.group(i).trim());
+		for(int i = 1; i <= m.groupCount(); i++) {
+			this.usernameDescovers.add(string.substring(start, m.start(i)+1));
+			start = m.start(i)+2;
+		}
 	}
 
 	/**
