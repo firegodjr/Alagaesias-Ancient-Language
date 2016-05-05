@@ -1,12 +1,7 @@
 package com.firegodjr.ancientlanguage.magic.words;
 
 import java.util.List;
-
-import com.firegodjr.ancientlanguage.api.script.IWardPlacer;
-import com.firegodjr.ancientlanguage.api.script.IWord;
-import com.firegodjr.ancientlanguage.blocks.ModBlocks;
-import com.firegodjr.ancientlanguage.magic.ScriptInstance;
-import com.firegodjr.ancientlanguage.utils.BlockPosHit;
+import java.util.Map;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -22,6 +17,12 @@ import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 
+import com.firegodjr.ancientlanguage.api.script.IWardPlacer;
+import com.firegodjr.ancientlanguage.api.script.IWord;
+import com.firegodjr.ancientlanguage.blocks.ModBlocks;
+import com.firegodjr.ancientlanguage.magic.MagicData;
+import com.firegodjr.ancientlanguage.utils.BlockPosHit;
+
 public class WordAction {
 
 	/**
@@ -29,7 +30,7 @@ public class WordAction {
 	 */
 	public static class ShieldWord implements IWord {
 		@Override
-		public void onUse(ScriptInstance script, List<?> selectors) {
+		public void onUse(MagicData energy, Map<String, String> modData, List<?> selectors) {
 			int fatigue = 0;
 			for (Object obj : selectors) {
 				if (obj instanceof EntityLivingBase) {
@@ -39,7 +40,7 @@ public class WordAction {
 							.addPotionEffect(new PotionEffect(Potion.resistance.id, 1200, 2, true, false));
 				}
 			}
-			script.getEnergy().performMagic(fatigue * 20); // TODO: Balance Fatigue
+			energy.performMagic(fatigue * 0.1f); // 10 fatigue here = 100% energy request
 		}
 	}
 
@@ -48,15 +49,15 @@ public class WordAction {
 	 */
 	public static class BreakWord implements IWord {
 		@Override
-		public void onUse(ScriptInstance script, List<?> selectors) {
+		public void onUse(MagicData energy, Map<String, String> modData, List<?> selectors) {
 			int fatigue = 0;
 			for (Object obj : selectors) {
 				if (obj instanceof Entity) {
 					// Attacks entities with break word
 					((Entity) obj).attackEntityFrom(DamageSource.magic, 5F);
 					fatigue++;
-				} else if (obj instanceof BlockPosHit && script.getActualUser() instanceof Entity) {
-					Entity entity = (Entity) script.getActualUser();
+				} else if (obj instanceof BlockPosHit && energy.getActualUser() instanceof Entity) {
+					Entity entity = (Entity) energy.getActualUser();
 					World world = entity.worldObj;
 					BlockPos pos = ((BlockPosHit) obj).pos;
 					fatigue += world.getBlockState(pos).getBlock().getBlockHardness(world, pos) / 4;
@@ -64,7 +65,7 @@ public class WordAction {
 					world.destroyBlock(pos, false);
 				}
 			}
-			script.getEnergy().performMagic(fatigue * 20); // TODO: Balance Fatigue
+			energy.performMagic(fatigue * 0.2f); // 5 fatigue here = 100% energy request
 		}
 	}
 
@@ -73,19 +74,19 @@ public class WordAction {
 	 */
 	public static class KillWord implements IWord {
 		@Override
-		public void onUse(ScriptInstance script, List<?> selectors) {
+		public void onUse(MagicData energy, Map<String, String> modData, List<?> selectors) {
 			int fatigue = 0;
 			for (Object obj : selectors) {
 				if (obj instanceof EntityLivingBase) {
 					EntityLivingBase entity = (EntityLivingBase) obj;
+					fatigue++; // users must be careful, easy to get harmed by magic here
 					if (entity.getHealth() <= 30) {
-						fatigue++;
 						entity.setHealth(0.1F);
 						// Vergari/Kill Actions
 						entity.attackEntityFrom(DamageSource.magic, 0.2F);
 					} else {
-						if (script.getActualUser() instanceof EntityPlayer) {
-							EntityPlayer player = (EntityPlayer) script.getActualUser();
+						if (energy.getActualUser() instanceof EntityPlayer) {
+							EntityPlayer player = (EntityPlayer) energy.getActualUser();
 							player.attackEntityFrom(DamageSource.magic, 0.1f);
 							player.addChatComponentMessage(
 									new ChatComponentText(EnumChatFormatting.GRAY + "" + EnumChatFormatting.ITALIC
@@ -94,7 +95,7 @@ public class WordAction {
 					}
 				}
 			}
-			script.getEnergy().performMagic(fatigue * 20); // TODO: Balance Fatigue
+			energy.performMagic(fatigue * 0.25f); // 4 fatigue  = 100% energy request
 		}
 	}
 
@@ -103,22 +104,22 @@ public class WordAction {
 	 */
 	public static class FireWord implements IWord {
 		@Override
-		public void onUse(ScriptInstance script, List<?> selectors) {
+		public void onUse(MagicData energy, Map<String, String> modData, List<?> selectors) {
 			int fatigue = 0;
 			for (Object obj : selectors) {
 				if (obj instanceof EntityLivingBase) {
 					fatigue++;
 					// Sets selected entities on fire
 					((EntityLivingBase) obj).setFire(10);
-				} else if (obj instanceof BlockPosHit && script.getActualUser() instanceof Entity) {
-					World world = ((Entity) script.getActualUser()).worldObj;
+				} else if (obj instanceof BlockPosHit && energy.getActualUser() instanceof Entity) {
+					World world = ((Entity) energy.getActualUser()).worldObj;
 					BlockPosHit pos = (BlockPosHit) obj;
 					// Sets block on fire
 					if (world.getBlockState(pos.pos.offset(pos.side)).getBlock() == Blocks.air)
 						world.setBlockState(pos.pos.offset(pos.side), Blocks.fire.getDefaultState());
 				}
 			}
-			script.getEnergy().performMagic(fatigue * 20); // TODO: Balance Fatigue
+			energy.performMagic(fatigue * 0.1f); // 10 fatigue  = 100% energy request
 		}
 	}
 
@@ -127,7 +128,7 @@ public class WordAction {
 	 */
 	public static class HealWord implements IWord {
 		@Override
-		public void onUse(ScriptInstance script, List<?> selectors) {
+		public void onUse(MagicData energy, Map<String, String> modData, List<?> selectors) {
 			int fatigue = 0;
 			for (Object obj : selectors) {
 				if (obj instanceof EntityLivingBase) {
@@ -137,7 +138,7 @@ public class WordAction {
 					ent.setHealth(ent.getHealth() + 6);
 				}
 			}
-			script.getEnergy().performMagic(fatigue * 20); // TODO: Balance Fatigue
+			energy.performMagic(fatigue * 0.1f); // 10 fatigue = 100% energy request
 		}
 	}
 
@@ -146,7 +147,7 @@ public class WordAction {
 	 */
 	public static class HaltWord implements IWord {
 		@Override
-		public void onUse(ScriptInstance script, List<?> selectors) {
+		public void onUse(MagicData energy, Map<String, String> modData, List<?> selectors) {
 			int fatigue = 0;
 			for (Object obj : selectors) {
 				if (obj instanceof EntityLivingBase) {
@@ -156,7 +157,7 @@ public class WordAction {
 							.addPotionEffect(new PotionEffect(Potion.moveSlowdown.id, 200, 99, true, false));
 				}
 			}
-			script.getEnergy().performMagic(fatigue * 20); // TODO: Balance Fatigue
+			energy.performMagic(fatigue * 0.2f); // 5 fatigue = 100% energy request
 		}
 	}
 
@@ -165,11 +166,13 @@ public class WordAction {
 	 */
 	public static class RiseWord implements IWord {
 		@Override
-		public void onUse(ScriptInstance script, List<?> selectors) {
+		public void onUse(MagicData energy, Map<String, String> modData, List<?> selectors) {
+			int fatigue = 0;
 			for (Object obj : selectors) {
-				if (obj instanceof BlockPosHit && script.getActualUser() instanceof Entity) {
+				if (obj instanceof BlockPosHit && energy.getActualUser() instanceof Entity) {
+					fatigue++;
 					BlockPosHit pos = (BlockPosHit) obj;
-					World world = ((Entity) script.getActualUser()).worldObj;
+					World world = ((Entity) energy.getActualUser()).worldObj;
 					world.setBlockState(pos.pos, Blocks.air.getDefaultState());
 					EntityFallingBlock blockEntity = new EntityFallingBlock(world, pos.pos.getX() + 0.5,
 							pos.pos.getY() + 0.5, pos.pos.getZ() + 0.5, world.getBlockState(pos.pos));
@@ -177,8 +180,12 @@ public class WordAction {
 					blockEntity.setVelocity(0, 100, 0);
 					// Causes blocks to fly upwards
 				}
+				if(obj instanceof Entity) {
+					fatigue++;
+					((Entity)obj).addVelocity(0, 100, 0);
+				}
 			}
-			// TODO: Fatigue
+			energy.performMagic(fatigue * 0.2f); // 5 fatigue = 100% energy request
 		}
 	}
 
@@ -187,18 +194,18 @@ public class WordAction {
 	 */
 	public static class BrightenWord implements IWord {
 		@Override
-		public void onUse(ScriptInstance script, List<?> selectors) {
+		public void onUse(MagicData energy, Map<String, String> modData, List<?> selectors) {
 			for (Object obj : selectors) {
-				if (obj instanceof BlockPosHit && script.getActualUser() instanceof Entity) {
+				if (obj instanceof BlockPosHit && energy.getActualUser() instanceof Entity) {
 					BlockPosHit pos = (BlockPosHit) obj;
-					World world = ((Entity) script.getActualUser()).worldObj;
+					World world = ((Entity) energy.getActualUser()).worldObj;
 					// Creates a ghost/werelight
 					if (world.getBlockState(pos.pos.offset(pos.side)).getBlock() == Blocks.air) {
 						world.setBlockState(pos.pos.offset(pos.side), ModBlocks.ghostLight.getDefaultState());
 					}
 				}
 			}
-			// TODO: Fatigue
+			energy.performMagic(0.1f); // no matter what, only uses 10% of energy
 		}
 	}
 
@@ -207,12 +214,13 @@ public class WordAction {
 	 */
 	public static class PlaceWardWord implements IWord, IWardPlacer {
 		@Override
-		public void onUse(ScriptInstance script, List<?> selectors) {
+		public void onUse(MagicData energy, Map<String, String> modData, List<?> selectors) {
 			for (Object obj : selectors) {
-				if (obj instanceof BlockPosHit && script.getActualUser() instanceof Entity) {
+				if (obj instanceof BlockPosHit && energy.getActualUser() instanceof Entity) {
 					BlockPosHit bph = (BlockPosHit) obj;
+					@SuppressWarnings("unused")
 					Vec3 v = new Vec3(bph.pos.getX(), bph.pos.getY(), bph.pos.getZ());
-					WordHandler.placeWard(((Entity) script.getActualUser()).worldObj, v, script.getWardlessChant(), 50);
+					//WordHandler.placeWard(((Entity) energy.getActualUser()).worldObj, v, energy.getWardlessChant(), 50);
 					return;
 				}
 			}

@@ -5,6 +5,12 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import joptsimple.internal.Strings;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.Vec3;
+import net.minecraft.world.World;
+
 import com.firegodjr.ancientlanguage.Main;
 import com.firegodjr.ancientlanguage.api.magic.IEnergyProducer;
 import com.firegodjr.ancientlanguage.api.script.IModifier;
@@ -12,44 +18,48 @@ import com.firegodjr.ancientlanguage.api.script.IScriptObject;
 import com.firegodjr.ancientlanguage.api.script.ISelector;
 import com.firegodjr.ancientlanguage.api.script.IWardPlacer;
 import com.firegodjr.ancientlanguage.api.script.IWord;
-import com.firegodjr.ancientlanguage.utils.ScriptUtils;
+import com.firegodjr.ancientlanguage.utils.MagicUtils;
+import com.firegodjr.ancientlanguage.utils.ModHooks;
+import com.firegodjr.ancientlanguage.utils.ScriptData;
+import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
-
-import joptsimple.internal.Strings;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.Vec3;
-import net.minecraft.world.World;
 
 /**
  * Class for managing and executing script instances
  */
 public final class ScriptInstance {
 
-	private MagicEnergy energyStore;
-	private Object actualUser;
+	private MagicData energyStore;
+	private String originalScript;
 	private List<IScriptObject> words;
 	private List<String> chantedWords = new ArrayList<String>();
 	private List<String> wardWords = new ArrayList<String>();
+	private ScriptData data;
 
 	private int currentParsePos;
 	private int seperatorPos;
 
 	public ScriptInstance(IEnergyProducer producer, String script) {
 		Main.getLogger().info("Script: " + script);
+		this.originalScript = script;
 		this.words = parseScript(script);
-		this.energyStore = new MagicEnergy(producer);
-		this.actualUser = producer;
+		this.energyStore = new MagicData(producer);
+		this.data = new ScriptData();
 	}
 
 	public ScriptInstance(Entity producer, String script) {
-		this(ScriptUtils.createProducerFor(producer), script);
-		this.actualUser = producer;
+		this(MagicUtils.createProducerFor(producer), script);
+		this.energyStore.setActualUser(producer);
 	}
 
 	public ScriptInstance(EntityPlayer producer, String script) {
-		this(ScriptUtils.createProducerFor(producer), script);
-		this.actualUser = producer;
+		this(MagicUtils.createProducerFor(producer), script);
+		this.energyStore.setActualUser(producer);
+	}
+
+	public ScriptInstance(IEnergyProducer producer, String script, ScriptData data) {
+		this(producer, script);
+		this.data = data;
 	}
 
 	/**
@@ -106,6 +116,7 @@ public final class ScriptInstance {
 	 * @return A list of all actionable interfaces
 	 */
 	protected List<IScriptObject> parseScript(String script) {
+		if(!ModHooks.onPreParse(this, script)) return Lists.newArrayList();
 		Main.getLogger().info("Parsing Script");
 		List<IScriptObject> parsedScript = new ArrayList<IScriptObject>();
 		int position = 0;
@@ -131,6 +142,7 @@ public final class ScriptInstance {
 			position = wordEnd;
 		}
 		Main.getLogger().info("Finished Parsing Script");
+		if(!ModHooks.onPostParse(this, script, parsedScript)) return Lists.newArrayList();
 		return parsedScript;
 	}
 
@@ -142,18 +154,26 @@ public final class ScriptInstance {
 	 * @param position
 	 *            The position executed in
 	 */
-	public void onExecute(World world, Vec3 position) {
+	public void onExecute(World world, final Vec3 position) {
 		Main.getLogger().info("Attempting to Execute Parsed Script");
 		// if(!world.isRemote) return;
 		Main.getLogger().info("Executing Parsed Script");
-		List<Object> selected = new ArrayList<Object>();
+		@SuppressWarnings("unchecked")
+		List<Object> selected = world.getPlayers(EntityPlayer.class, new Predicate<EntityPlayer>() {
+			@Override
+			public boolean apply(EntityPlayer input) {
+				return position.squareDistanceTo(input.getPositionVector()) <= 100 && originalScript.indexOf(input.getName()) != -1;
+			}}); // Can probably change in other branches, but will only bother when they get merged
+		if(selected == null) selected = new ArrayList<Object>();
 		List<IWord> activeWords = new ArrayList<IWord>();
 		IScriptObject currentWord;
 		for (currentParsePos = 0; currentParsePos < words.size(); currentParsePos++) {
 			currentWord = words.get(currentParsePos);
 			if (currentWord instanceof ISelector) {
+				ISelector selector = (ISelector) currentWord;
+				if(!ModHooks.onTypeActivation(this, this.originalScript, this.words, selector, this.chantedWords.get(currentParsePos))) continue;
 				Main.getLogger().info("Selector found");
-				List<?> s = ((ISelector) currentWord).getSelected(this, world, position);
+				List<?> s = selector.getSelected(this.getEnergy(), this.data.getImmutableData(selector), world, position);
 				if(s != null) {
 					s.removeAll(Collections.singleton(null)); // Prevents NPEs
 					selected.addAll(s);
@@ -161,16 +181,17 @@ public final class ScriptInstance {
 			}
 
 			if (currentWord instanceof IWord) {
+				IWord action = (IWord) currentWord;
+				if(!ModHooks.onTypeActivation(this, this.originalScript, this.words, action, this.chantedWords.get(currentParsePos))) continue;
 				Main.getLogger().info("Action Word found");
-				activeWords.add((IWord) currentWord);
+				activeWords.add(action);
 			}
 
 			if (currentWord instanceof IModifier) {
+				IModifier mod = (IModifier) currentWord;
+				if(!ModHooks.onTypeActivation(this, this.originalScript, this.words, mod, this.chantedWords.get(currentParsePos))) continue;
 				Main.getLogger().info("Modifier found");
-				if (currentParsePos - 1 > -1)
-					((IModifier) currentWord).modifyWord(this, words.get(currentParsePos - 1));
-				else
-					Main.getLogger().info("Modifier did nothing");
+				mod.modifyWord(this.getEnergy(), this.data, this.words);
 			}
 
 			if (this.seperatorPos == this.currentParsePos || this.currentParsePos == words.size() - 1) {
@@ -182,25 +203,26 @@ public final class ScriptInstance {
 				Main.getLogger().info("Active Words are null: " + activeWords == null + ", Active Words are empty: "
 						+ activeWords.isEmpty() + ", Active Words: " + activeWords);
 				for (IWord word : activeWords)
-					word.onUse(this, selected);
+					word.onUse(this.getEnergy(), this.data.getImmutableData(word), selected);
 				activeWords.clear();
 				Main.getLogger().info("Active words cleared");
 			}
 		}
 		Main.getLogger().info("Script Execution finished");
+		ModHooks.onScriptEnd(this, this.originalScript, this.words);
 	}
 
 	/**
 	 * Retrieves Energy producing object running this script
 	 */
 	public Object getActualUser() {
-		return this.actualUser;
+		return this.getEnergy().getActualUser();
 	}
 
 	/**
 	 * Retrieves the energy storage object
 	 */
-	public MagicEnergy getEnergy() {
+	public MagicData getEnergy() {
 		return this.energyStore;
 	}
 

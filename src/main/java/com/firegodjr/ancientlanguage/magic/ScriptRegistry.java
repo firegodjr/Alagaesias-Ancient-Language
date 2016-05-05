@@ -1,10 +1,12 @@
 package com.firegodjr.ancientlanguage.magic;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.firegodjr.ancientlanguage.Main;
 import com.firegodjr.ancientlanguage.api.script.IScriptObject;
+import com.google.common.collect.Lists;
 
 /**
  * A Script Registry Class for storing interface and word objects for script use
@@ -46,6 +48,13 @@ public class ScriptRegistry {
 	 */
 	public static String getStringForInterface(IScriptObject obj) {
 		return interfaceToWord.get(obj);
+	}
+
+	/**
+	 * Retrieves all registered words
+	 */
+	public static List<String> getAllWords() {
+		return Lists.newArrayList(wordToInterface.keySet());
 	}
 
 }

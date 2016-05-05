@@ -20,19 +20,19 @@ import net.minecraft.util.Vec3;
 
 public class WardEntity extends TileEntity implements IUpdatePlayerListBox, IEnergyProducer {
 
-	private int energy;
+	private float energy;
 	private ScriptInstance script;
 	private EnumFacing direction = EnumFacing.UP;
 
 	public WardEntity() {
 	}
 	
-	public WardEntity(List<String> argsIn, int energy) {
+	public WardEntity(List<String> argsIn, float energy) {
 		script = new ScriptInstance(this, ScriptInstance.getStringFrom(argsIn));
 		this.energy = energy;
 	}
 	
-	public WardEntity setEnergy(int energy) {
+	public WardEntity setEnergy(float energy) {
 		this.energy = energy;
 		return this;
 	}
@@ -61,7 +61,7 @@ public class WardEntity extends TileEntity implements IUpdatePlayerListBox, IEne
 	public void writeToNBT(NBTTagCompound compound) {
 		super.writeToNBT(compound);
 		compound.setString("SpellScript", Strings.join(script.getChant(), " "));
-		compound.setInteger("MagicEnergy", energy);
+		compound.setFloat("MagicEnergy", energy);
 		NBTUtils.convertFacingToTag(compound, this.direction);
 	}
 
@@ -88,8 +88,8 @@ public class WardEntity extends TileEntity implements IUpdatePlayerListBox, IEne
 	}
 
 	@Override
-	public int useMagic(int energyToPull) {
-		int result = this.energy;
+	public float useMagic(float energyToPull) {
+		float result = this.energy;
 		if (energyToPull > this.energy) {
 			this.energy = 0;
 		} else {

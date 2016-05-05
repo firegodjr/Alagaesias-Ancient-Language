@@ -32,7 +32,7 @@ archivesBaseName = "AncientLanguage"
 
 minecraft {
     version = config.mcversion+"-"+config.forgeversion // "1.8-11.14.3.1450"
-    runDir = "eclipse"
+    runDir = 'minecraft'
     mappings = "snapshot_20141130"
 }
 
