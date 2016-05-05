@@ -65,7 +65,7 @@ public final class ScriptInstance {
 
 	/**
 	 * Creates String from an array
-	 * 
+	 *
 	 * @param args
 	 *            The array to create from
 	 */
@@ -75,7 +75,7 @@ public final class ScriptInstance {
 
 	/**
 	 * Creates String from a collection
-	 * 
+	 *
 	 * @param args
 	 *            The array to create from
 	 */
@@ -87,7 +87,7 @@ public final class ScriptInstance {
 	 * Parses {@link #originalScript} into {@link #words}
 	 */
 	protected void parseScript() {
-		if(ModHooks.onPreParse(this, this.originalScript)) {
+		if (ModHooks.onPreParse(this, this.originalScript)) {
 			this.words = Lists.newArrayList();
 			return;
 		}
@@ -106,14 +106,16 @@ public final class ScriptInstance {
 				word = this.originalScript.substring(position, wordEnd);
 			}
 			Main.getLogger().info("\nCurrent Position: " + position + "\nCurrent Word: " + word + "\nCurrent Word's End: " + wordEnd);
+			String name = Main.getConfig().getNameVersion(word);
 			IScriptObject scriptObj = ScriptRegistry.getInterfaceForString(word);
-			if (names.contains(word)) this.chantedWords.add(word);
+			if (!name.isEmpty() && names.contains(name)) this.chantedWords.add(name);
 			else if (scriptObj != null && parsedScript.add(scriptObj) && this.chantedWords.add(word) && scriptObj instanceof IWardPlacer)
 				this.wardWords.add(word);
+			else if (names.contains(word)) this.chantedWords.add(word);
 			position = wordEnd;
 		}
 		Main.getLogger().info("Finished Parsing Script");
-		if(ModHooks.onPostParse(this, this.originalScript, parsedScript)) {
+		if (ModHooks.onPostParse(this, this.originalScript, parsedScript)) {
 			this.words = Lists.newArrayList();
 			return;
 		}
@@ -122,15 +124,13 @@ public final class ScriptInstance {
 
 	/**
 	 * Handles execution of the script
-	 * 
+	 *
 	 * @param world
 	 *            The world executed in
 	 * @param position
 	 *            The position executed in
 	 */
 	public void onExecute(World world, final Vec3 position) {
-		Main.getLogger().info("Attempting to Execute Parsed Script");
-		// if(!world.isRemote) return;
 		Main.getLogger().info("Executing Parsed Script");
 		@SuppressWarnings("unchecked")
 		List<Object> selected = world.getPlayers(EntityPlayer.class, new Predicate<EntityPlayer>() {
@@ -138,17 +138,17 @@ public final class ScriptInstance {
 			public boolean apply(EntityPlayer input) {
 				return position.squareDistanceTo(input.getPositionVector()) <= 100 && originalScript.indexOf(input.getName()) != -1;
 			}});
-		if(selected == null) selected = new ArrayList<Object>();
-		List<IWord> activeWords = new ArrayList<IWord>();
+		if (selected == null) selected = Lists.newArrayList();
+		List<IWord> activeWords = Lists.newArrayList();
 		IScriptObject currentWord;
 		for (currentParsePos = 0; currentParsePos < words.size(); currentParsePos++) {
 			currentWord = words.get(currentParsePos);
 			if (currentWord instanceof ISelector) {
 				ISelector selector = (ISelector) currentWord;
-				if(ModHooks.onTypeActivation(this, this.originalScript, this.words, selector, this.chantedWords.get(currentParsePos))) continue;
+				if (ModHooks.onTypeActivation(this, this.originalScript, this.words, selector, this.chantedWords.get(currentParsePos))) continue;
 				Main.getLogger().info("Selector found");
 				List<?> s = selector.getSelected(this.getEnergy(), this.data.getImmutableData(selector), world, position);
-				if(s != null) {
+				if (s != null) {
 					s.removeAll(Collections.singleton(null)); // Prevents NPEs
 					selected.addAll(s);
 				}
@@ -156,23 +156,22 @@ public final class ScriptInstance {
 
 			if (currentWord instanceof IWord) {
 				IWord action = (IWord) currentWord;
-				if(ModHooks.onTypeActivation(this, this.originalScript, this.words, action, this.chantedWords.get(currentParsePos))) continue;
+				if (ModHooks.onTypeActivation(this, this.originalScript, this.words, action, this.chantedWords.get(currentParsePos))) continue;
 				Main.getLogger().info("Action Word found");
 				activeWords.add(action);
 			}
 
 			if (currentWord instanceof IModifier) {
 				IModifier mod = (IModifier) currentWord;
-				if(ModHooks.onTypeActivation(this, this.originalScript, this.words, mod, this.chantedWords.get(currentParsePos))) continue;
+				if (ModHooks.onTypeActivation(this, this.originalScript, this.words, mod, this.chantedWords.get(currentParsePos))) continue;
 				Main.getLogger().info("Modifier found");
-				mod.modifyWord(this.getEnergy(), this.data, this.words);
+				if (mod.modifyWord(this.getEnergy(), this.data, this.words)) this.setSeperatorAtCurrent();
 			}
 
 			if (this.seperatorPos == this.currentParsePos || this.currentParsePos == words.size() - 1) {
 				Main.getLogger().info("Reached seperator, running seperated section");
-				selected.removeAll(Collections.singleton(null));
 				activeWords.removeAll(Collections.singleton(null));
-				Main.getLogger().info("Selected is null: " + selected == null + ", Selected is empty"
+				Main.getLogger().info("Selected is null: " + selected == null + ", Selected is empty: "
 						+ selected.isEmpty() + ", Selected: " + selected);
 				Main.getLogger().info("Active Words are null: " + activeWords == null + ", Active Words are empty: "
 						+ activeWords.isEmpty() + ", Active Words: " + activeWords);
@@ -234,6 +233,7 @@ public final class ScriptInstance {
 	 * Retrieves a printable chant
 	 */
 	public String getPrintableChant() {
+		if (this.chantedWords.isEmpty()) return "";
 		return new StringBuilder(Strings.join(this.getChant(), " ")).append("!").toString();
 	}
 
