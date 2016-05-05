@@ -48,11 +48,7 @@ public class CommandCast extends CommandBase {
 					EnumChatFormatting.GRAY.toString() + EnumChatFormatting.ITALIC + "You said nothing."));
 		else {
 			Main.getLogger().info("Starting new ScriptInstance object");
-			ScriptInstance instance = ScriptInstance.createScriptInstance(sender, args);
-			if (instance == null) {
-				Main.getLogger().info("Script instance was null");
-				return;
-			}
+			ScriptInstance instance = new ScriptInstance(sender, args);
 			Main.getLogger().info("Entering script execution");
 			instance.onExecute(sender.getEntityWorld(), sender.getPositionVector());
 			if (sender instanceof EntityPlayer) {

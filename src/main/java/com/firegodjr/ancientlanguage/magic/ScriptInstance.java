@@ -6,8 +6,10 @@ import java.util.Collections;
 import java.util.List;
 
 import joptsimple.internal.Strings;
+import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 
@@ -42,9 +44,13 @@ public final class ScriptInstance {
 	public ScriptInstance(IEnergyProducer producer, String script) {
 		Main.getLogger().info("Script: " + script);
 		this.originalScript = script;
-		this.words = parseScript(script);
 		this.energyStore = new MagicData(producer);
 		this.data = new ScriptData();
+		parseScript();
+	}
+
+	public ScriptInstance(ICommandSender sender, String[] args) {
+		this((Entity)(sender instanceof Entity ? sender : sender.getCommandSenderEntity()), Strings.join(args, " "));
 	}
 
 	public ScriptInstance(Entity producer, String script) {
@@ -52,40 +58,9 @@ public final class ScriptInstance {
 		this.energyStore.setActualUser(producer);
 	}
 
-	public ScriptInstance(EntityPlayer producer, String script) {
-		this(MagicUtils.createProducerFor(producer), script);
-		this.energyStore.setActualUser(producer);
-	}
-
 	public ScriptInstance(IEnergyProducer producer, String script, ScriptData data) {
 		this(producer, script);
 		this.data = data;
-	}
-
-	/**
-	 * Creates a script instance for an object and arguments depending on the
-	 * object type
-	 * 
-	 * @param producer
-	 *            The object to create an instance for
-	 * @param args
-	 *            The arguments sent
-	 */
-	public static ScriptInstance createScriptInstance(Object producer, String[] args) {
-		String script = Strings.join(args, " ");
-
-		if (producer instanceof IEnergyProducer) {
-			Main.getLogger().info("Producer was IEnergyProducer");
-			return new ScriptInstance((IEnergyProducer) producer, script);
-		} else if (producer instanceof EntityPlayer) {
-			Main.getLogger().info("Producer was Player");
-			return new ScriptInstance((EntityPlayer) producer, script);
-		} else if (producer instanceof Entity) {
-			Main.getLogger().info("Producer was Entity");
-			return new ScriptInstance((Entity) producer, script);
-		} else {
-			return null;
-		}
 	}
 
 	/**
@@ -109,41 +84,40 @@ public final class ScriptInstance {
 	}
 
 	/**
-	 * Parses script into actionable interfaces
-	 * 
-	 * @param script
-	 *            The script to parse
-	 * @return A list of all actionable interfaces
+	 * Parses {@link #originalScript} into {@link #words}
 	 */
-	protected List<IScriptObject> parseScript(String script) {
-		if(!ModHooks.onPreParse(this, script)) return Lists.newArrayList();
+	protected void parseScript() {
+		if(ModHooks.onPreParse(this, this.originalScript)) {
+			this.words = Lists.newArrayList();
+			return;
+		}
 		Main.getLogger().info("Parsing Script");
 		List<IScriptObject> parsedScript = new ArrayList<IScriptObject>();
+		List<String> names = Lists.newArrayList(MinecraftServer.getServer().getAllUsernames());
 		int position = 0;
 		int wordEnd = -1;
 		String word;
 		while (position != -1) {
 			if (position != 0)
 				position++;
-			if ((wordEnd = script.indexOf(' ', position)) == -1) {
-				word = script.substring(position);
+			if ((wordEnd = this.originalScript.indexOf(' ', position)) == -1) {
+				word = this.originalScript.substring(position);
 			} else {
-				word = script.substring(position, wordEnd);
+				word = this.originalScript.substring(position, wordEnd);
 			}
-			Main.getLogger().info(
-					"\nCurrent Position: " + position + "\nCurrent Word: " + word + "\nCurrent Word's End: " + wordEnd);
+			Main.getLogger().info("\nCurrent Position: " + position + "\nCurrent Word: " + word + "\nCurrent Word's End: " + wordEnd);
 			IScriptObject scriptObj = ScriptRegistry.getInterfaceForString(word);
-			if (scriptObj != null && parsedScript.add(scriptObj)) {
-				this.chantedWords.add(word);
-				if (scriptObj instanceof IWardPlacer) {
-					this.wardWords.add(word);
-				}
-			}
+			if (names.contains(word)) this.chantedWords.add(word);
+			else if (scriptObj != null && parsedScript.add(scriptObj) && this.chantedWords.add(word) && scriptObj instanceof IWardPlacer)
+				this.wardWords.add(word);
 			position = wordEnd;
 		}
 		Main.getLogger().info("Finished Parsing Script");
-		if(!ModHooks.onPostParse(this, script, parsedScript)) return Lists.newArrayList();
-		return parsedScript;
+		if(ModHooks.onPostParse(this, this.originalScript, parsedScript)) {
+			this.words = Lists.newArrayList();
+			return;
+		}
+		this.words = parsedScript;
 	}
 
 	/**
@@ -163,7 +137,7 @@ public final class ScriptInstance {
 			@Override
 			public boolean apply(EntityPlayer input) {
 				return position.squareDistanceTo(input.getPositionVector()) <= 100 && originalScript.indexOf(input.getName()) != -1;
-			}}); // Can probably change in other branches, but will only bother when they get merged
+			}});
 		if(selected == null) selected = new ArrayList<Object>();
 		List<IWord> activeWords = new ArrayList<IWord>();
 		IScriptObject currentWord;
@@ -171,7 +145,7 @@ public final class ScriptInstance {
 			currentWord = words.get(currentParsePos);
 			if (currentWord instanceof ISelector) {
 				ISelector selector = (ISelector) currentWord;
-				if(!ModHooks.onTypeActivation(this, this.originalScript, this.words, selector, this.chantedWords.get(currentParsePos))) continue;
+				if(ModHooks.onTypeActivation(this, this.originalScript, this.words, selector, this.chantedWords.get(currentParsePos))) continue;
 				Main.getLogger().info("Selector found");
 				List<?> s = selector.getSelected(this.getEnergy(), this.data.getImmutableData(selector), world, position);
 				if(s != null) {
@@ -182,14 +156,14 @@ public final class ScriptInstance {
 
 			if (currentWord instanceof IWord) {
 				IWord action = (IWord) currentWord;
-				if(!ModHooks.onTypeActivation(this, this.originalScript, this.words, action, this.chantedWords.get(currentParsePos))) continue;
+				if(ModHooks.onTypeActivation(this, this.originalScript, this.words, action, this.chantedWords.get(currentParsePos))) continue;
 				Main.getLogger().info("Action Word found");
 				activeWords.add(action);
 			}
 
 			if (currentWord instanceof IModifier) {
 				IModifier mod = (IModifier) currentWord;
-				if(!ModHooks.onTypeActivation(this, this.originalScript, this.words, mod, this.chantedWords.get(currentParsePos))) continue;
+				if(ModHooks.onTypeActivation(this, this.originalScript, this.words, mod, this.chantedWords.get(currentParsePos))) continue;
 				Main.getLogger().info("Modifier found");
 				mod.modifyWord(this.getEnergy(), this.data, this.words);
 			}
