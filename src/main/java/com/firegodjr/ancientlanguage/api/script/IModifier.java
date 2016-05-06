@@ -12,14 +12,16 @@ public interface IModifier extends IScriptObject {
 
 	/**
 	 * Allows modification of words in the script
-	 * 
+	 *
 	 * @param energy
 	 *            The script object energy data
 	 * @param data
 	 *            The ScriptInstance data to check or modify
 	 * @param objects
 	 *            The script objects to be modified
+	 *
+	 * @return Whether this is a seperator or not
 	 */
-	public void modifyWord(MagicData energy, ScriptData data, List<IScriptObject> objects);
+	public boolean modifyWord(MagicData energy, ScriptData data, List<IScriptObject> objects);
 
 }

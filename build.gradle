@@ -38,8 +38,18 @@ minecraft {
 
 sourceSets {
 	main {
-		java { srcDir 'java' }
+		java {
+			srcDir 'java'
+			exclude 'test/**'
+		}
 		resources { srcDir 'resources' include('**') }
+	}
+
+	test {
+		java {
+			srcDir 'java'
+			exclude 'com/**'
+		}
 	}
 }
 

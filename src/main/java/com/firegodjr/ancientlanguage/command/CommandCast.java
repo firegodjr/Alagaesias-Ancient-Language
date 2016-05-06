@@ -44,21 +44,20 @@ public class CommandCast extends CommandBase {
 	@Override
 	public void execute(ICommandSender sender, String[] args) throws CommandException {
 		if (args.length == 0)
-			sender.addChatMessage(new ChatComponentText(
-					EnumChatFormatting.GRAY.toString() + EnumChatFormatting.ITALIC + "You said nothing."));
+			sender.addChatMessage(new ChatComponentText(EnumChatFormatting.GRAY.toString() + EnumChatFormatting.ITALIC + "You said nothing."));
 		else {
 			Main.getLogger().info("Starting new ScriptInstance object");
 			ScriptInstance instance = new ScriptInstance(sender, args);
 			Main.getLogger().info("Entering script execution");
 			instance.onExecute(sender.getEntityWorld(), sender.getPositionVector());
-			if (sender instanceof EntityPlayer) {
-				Main.getLogger().info("Telling Player Chant");
-				EntityPlayer player = (EntityPlayer) sender;
-				player.addChatComponentMessage(
-						new ChatComponentText(EnumChatFormatting.GRAY + "" + EnumChatFormatting.ITALIC + "You chant: \""
-								+ EnumChatFormatting.RESET + EnumChatFormatting.AQUA + instance.getPrintableChant()
+			if (sender instanceof EntityPlayer)	Main.getLogger().info("Telling Player Chant");
+			String message = instance.getPrintableChant();
+			if (message.isEmpty())
+				throw new CommandException("What you said seemed to have failed.");
+			sender.addChatMessage(
+						new ChatComponentText(EnumChatFormatting.GRAY.toString() + EnumChatFormatting.ITALIC + "You chant: \""
+								+ EnumChatFormatting.RESET + EnumChatFormatting.AQUA + message
 								+ EnumChatFormatting.GRAY + EnumChatFormatting.ITALIC + "\""));
-			}
 			Main.getLogger().info("Cast Command Executed!");
 		}
 	}

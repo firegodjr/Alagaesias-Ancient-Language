@@ -3,7 +3,11 @@ package com.firegodjr.ancientlanguage.magic.words;
 import java.util.List;
 
 import com.firegodjr.ancientlanguage.Main;
+import com.firegodjr.ancientlanguage.api.script.IModifier;
+import com.firegodjr.ancientlanguage.api.script.IScriptObject;
+import com.firegodjr.ancientlanguage.magic.MagicData;
 import com.firegodjr.ancientlanguage.magic.ScriptRegistry;
+import com.firegodjr.ancientlanguage.utils.ScriptData;
 import com.firegodjr.ancientlanguage.wards.WardBlock;
 
 import net.minecraft.util.BlockPos;
@@ -47,6 +51,13 @@ public class WordHandler {
 		ScriptRegistry.registerWord("sem", new WordSelector.ThatSelector());
 		// Selects random stone blocks surrounding fired position
 		ScriptRegistry.registerWord("stenr", new WordSelector.StoneSelector());
+
+		//Semi-colon seperator
+		ScriptRegistry.registerWord(";", new IModifier() {
+			@Override
+			public boolean modifyWord(MagicData energy, ScriptData data, List<IScriptObject> objects) {
+				return true;
+			}});
 	}
 
 	public static void placeWard(World world, Vec3 target, List<String> args, int charge) {
