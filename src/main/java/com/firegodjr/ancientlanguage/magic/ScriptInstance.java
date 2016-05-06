@@ -10,6 +10,8 @@ import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 
@@ -132,6 +134,7 @@ public final class ScriptInstance {
 	 */
 	public void onExecute(World world, final Vec3 position) {
 		Main.getLogger().info("Executing Parsed Script");
+		List<String> heardWords = Lists.newArrayList();
 		@SuppressWarnings("unchecked")
 		List<Object> selected = world.getPlayers(EntityPlayer.class, new Predicate<EntityPlayer>() {
 			@Override
@@ -175,9 +178,20 @@ public final class ScriptInstance {
 						+ selected.isEmpty() + ", Selected: " + selected);
 				Main.getLogger().info("Active Words are null: " + activeWords == null + ", Active Words are empty: "
 						+ activeWords.isEmpty() + ", Active Words: " + activeWords);
-				for (IWord word : activeWords)
+				for (IWord word : activeWords) {
 					word.onUse(this.getEnergy(), this.data.getImmutableData(word), selected);
+					heardWords.add(ScriptRegistry.getStringForInterface(word));
+				}
+				for (Object o : selected) {
+					if(o instanceof ICommandSender) {
+						((ICommandSender)o).addChatMessage(new ChatComponentText(
+						EnumChatFormatting.AQUA.toString() + Strings.join(heardWords, " ") +
+						EnumChatFormatting.GRAY + EnumChatFormatting.ITALIC + " echoes in your mind..."));
+					}
+				}
+				heardWords.clear();
 				activeWords.clear();
+				selected.clear();
 				Main.getLogger().info("Active words cleared");
 			}
 		}
