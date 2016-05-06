@@ -20,7 +20,6 @@ import com.firegodjr.ancientlanguage.api.magic.IEnergyProducer;
 import com.firegodjr.ancientlanguage.api.script.IModifier;
 import com.firegodjr.ancientlanguage.api.script.IScriptObject;
 import com.firegodjr.ancientlanguage.api.script.ISelector;
-import com.firegodjr.ancientlanguage.api.script.IWardPlacer;
 import com.firegodjr.ancientlanguage.api.script.IWord;
 import com.firegodjr.ancientlanguage.utils.MagicUtils;
 import com.firegodjr.ancientlanguage.utils.ModHooks;
@@ -112,8 +111,7 @@ public final class ScriptInstance {
 			String name = Main.getConfig().getNameVersion(word);
 			IScriptObject scriptObj = ScriptRegistry.getInterfaceForString(word);
 			if (!name.isEmpty() && names.contains(name)) this.chantedWords.add(name);
-			else if (scriptObj != null && parsedScript.add(scriptObj) && this.chantedWords.add(word) && scriptObj instanceof IWardPlacer)
-				this.wardWords.add(word);
+			else if (scriptObj != null && parsedScript.add(scriptObj) && this.chantedWords.add(word));
 			else if (names.contains(word)) this.chantedWords.add(word);
 			position = wordEnd;
 		}

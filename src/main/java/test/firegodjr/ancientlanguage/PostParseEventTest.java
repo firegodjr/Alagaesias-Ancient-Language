@@ -3,7 +3,7 @@ package test.firegodjr.ancientlanguage;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
-import com.firegodjr.ancientlanguage.event.ScriptEvent;
+import com.firegodjr.ancientlanguage.api.script.events.ScriptEvent;
 
 public class PostParseEventTest {
 

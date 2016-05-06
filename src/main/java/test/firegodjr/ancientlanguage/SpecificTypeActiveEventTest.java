@@ -4,7 +4,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 import com.firegodjr.ancientlanguage.api.script.IWord;
-import com.firegodjr.ancientlanguage.event.ScriptEvent;
+import com.firegodjr.ancientlanguage.api.script.events.ScriptEvent;
 import com.firegodjr.ancientlanguage.magic.words.WordAction.ShieldWord;
 
 public class SpecificTypeActiveEventTest {

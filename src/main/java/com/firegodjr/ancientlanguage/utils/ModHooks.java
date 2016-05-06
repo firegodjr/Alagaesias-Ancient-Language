@@ -7,7 +7,7 @@ import java.util.List;
 import net.minecraftforge.common.MinecraftForge;
 
 import com.firegodjr.ancientlanguage.api.script.IScriptObject;
-import com.firegodjr.ancientlanguage.event.ScriptEvent.*;
+import com.firegodjr.ancientlanguage.api.script.events.ScriptEvent.*;
 import com.firegodjr.ancientlanguage.magic.ScriptInstance;
 
 public class ModHooks {
