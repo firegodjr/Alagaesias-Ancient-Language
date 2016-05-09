@@ -31,9 +31,9 @@ group= "com.firegodjr.ancientlanguage" // http://maven.apache.org/guides/mini/gu
 archivesBaseName = "AncientLanguage"
 
 minecraft {
-    version = config.mcversion+"-"+config.forgeversion // "1.8-11.14.3.1450"
+    version = config.mcversion+"-"+config.forgeversion+config.fvsuffix // "1.8-11.14.3.1450"
     runDir = 'minecraft'
-    mappings = "snapshot_20141130"
+    mappings = config.mapping // "snapshot_20141130"
 }
 
 sourceSets {

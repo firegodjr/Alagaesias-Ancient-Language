@@ -1,6 +1,7 @@
 package com.firegodjr.ancientlanguage.tileentity;
 
 import com.firegodjr.ancientlanguage.ParticleHandler;
+import com.firegodjr.ancientlanguage.utils.VersionUtils;
 
 import net.minecraft.server.gui.IUpdatePlayerListBox;
 import net.minecraft.tileentity.TileEntity;
@@ -12,7 +13,7 @@ public class TileEntityGhostLight extends TileEntity implements IUpdatePlayerLis
 
 	@Override
 	public void update() {
-		ParticleHandler.ghostLight(this.pos.getX(), this.pos.getY(), this.pos.getZ(), 1, worldObj);
+		ParticleHandler.ghostLight(VersionUtils.createVec3(this.pos), 1, worldObj);
 	}
 
 }

@@ -4,6 +4,8 @@ import java.util.Random;
 
 import com.firegodjr.ancientlanguage.ParticleHandler;
 import com.firegodjr.ancientlanguage.tileentity.TileEntityGhostLight;
+import com.firegodjr.ancientlanguage.utils.VersionUtils;
+import com.firegodjr.ancientlanguage.utils.VersionUtils.EnumParticleTypes;
 
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.Material;
@@ -12,7 +14,6 @@ import net.minecraft.item.Item;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
-import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.World;
 
@@ -37,7 +38,7 @@ public class BlockGhostLight extends BlockContainer {
 
 	@Override
 	public void onBlockDestroyedByPlayer(World world, BlockPos pos, IBlockState state) {
-		ParticleHandler.burst(pos.add(0.5, 0.5, 0.5), world, 10, 0.5, EnumParticleTypes.FIREWORKS_SPARK);
+		ParticleHandler.burst(VersionUtils.createVec3(pos).addVector(0.5, 0.5, 0.5), world, 10, 0.5, EnumParticleTypes.FIREWORKS_SPARK);
 	}
 
 	@Override
