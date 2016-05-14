@@ -31,9 +31,9 @@ group= "com.firegodjr.ancientlanguage" // http://maven.apache.org/guides/mini/gu
 archivesBaseName = "AncientLanguage"
 
 minecraft {
-    version = config.mcversion+"-"+config.forgeversion // "1.8-11.14.3.1450"
+    version = config.mcversion+"-"+config.forgeversion+config.fvsuffix // "1.8-11.14.3.1450"
     runDir = 'minecraft'
-    mappings = "snapshot_20141130"
+    mappings = config.mapping // "snapshot_20141130"
 }
 
 sourceSets {
@@ -72,8 +72,7 @@ processResources
 dependencies {
 }
 
-// Uncomment to allow deobf and source jar versions for easier addon development
-/*task deobfJar(type: Jar) {
+task deobfJar(type: Jar) {
 	from sourceSets.main.output
 	classifier = 'deobf'
 	destinationDir = file 'releases/API'
@@ -83,7 +82,7 @@ task sourceJar(type: Jar) {
 	from sourceSets.main.allSource
 	classifier = 'sources'
 	destinationDir = file 'releases/API'
-}*/
+}
 
 jar {
 	//Place jar into distribution folder
@@ -94,8 +93,7 @@ jar {
 }
 
 artifacts {
-	// Uncomment with above to allow deobf and source jar versions
-	//archives deobfJar
-	//archives sourceJar
+	archives deobfJar
+	archives sourceJar
 	archives jar
 }

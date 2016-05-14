@@ -3,11 +3,6 @@ package com.firegodjr.ancientlanguage.wards;
 import java.util.Collection;
 import java.util.List;
 
-import com.firegodjr.ancientlanguage.ParticleHandler;
-import com.firegodjr.ancientlanguage.api.magic.IEnergyProducer;
-import com.firegodjr.ancientlanguage.magic.ScriptInstance;
-import com.firegodjr.ancientlanguage.utils.NBTUtils;
-
 import joptsimple.internal.Strings;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.nbt.NBTTagCompound;
@@ -15,10 +10,16 @@ import net.minecraft.server.gui.IUpdatePlayerListBox;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.Vec3;
 
-public class WardEntity extends TileEntity implements IUpdatePlayerListBox, IEnergyProducer {
+import com.firegodjr.ancientlanguage.ParticleHandler;
+import com.firegodjr.ancientlanguage.api.magic.IEnergyProducer;
+import com.firegodjr.ancientlanguage.magic.ScriptInstance;
+import com.firegodjr.ancientlanguage.utils.NBTUtils;
+import com.firegodjr.ancientlanguage.utils.VersionUtils;
+
+public class WardEntity extends TileEntity implements IUpdatePlayerListBox,
+		IEnergyProducer {
 
 	private float energy;
 	private ScriptInstance script;
@@ -26,32 +27,34 @@ public class WardEntity extends TileEntity implements IUpdatePlayerListBox, IEne
 
 	public WardEntity() {
 	}
-	
+
 	public WardEntity(List<String> argsIn, float energy) {
 		script = new ScriptInstance(this, ScriptInstance.getStringFrom(argsIn));
 		this.energy = energy;
 	}
-	
+
 	public WardEntity setEnergy(float energy) {
 		this.energy = energy;
 		return this;
 	}
-	
+
 	public WardEntity setSpell(String spell) {
 		this.script = new ScriptInstance(this, spell);
 		return this;
 	}
-	
+
 	public WardEntity setSpell(Collection<String> spell) {
-		this.script = new ScriptInstance(this, ScriptInstance.getStringFrom(spell));
+		this.script = new ScriptInstance(this,
+				ScriptInstance.getStringFrom(spell));
 		return this;
 	}
-	
+
 	public WardEntity setSpell(String[] spell) {
-		this.script = new ScriptInstance(this, ScriptInstance.getStringFrom(spell));
+		this.script = new ScriptInstance(this,
+				ScriptInstance.getStringFrom(spell));
 		return this;
 	}
-	
+
 	public WardEntity setDirection(EnumFacing face) {
 		this.direction = face;
 		return this;
@@ -68,22 +71,27 @@ public class WardEntity extends TileEntity implements IUpdatePlayerListBox, IEne
 	@Override
 	public void readFromNBT(NBTTagCompound compound) {
 		super.readFromNBT(compound);
-		this.script = new ScriptInstance(this, compound.getString("SpellScript"));
+		this.script = new ScriptInstance(this,
+				compound.getString("SpellScript"));
 		this.energy = compound.getInteger("MagicEnergy");
 		this.direction = NBTUtils.convertTagContentToFacing(compound);
 	}
 
 	@Override
 	public void update() {
-		worldObj.spawnParticle(EnumParticleTypes.ENCHANTMENT_TABLE, this.pos.getX() + Math.random(),
-				this.pos.getY() + Math.random(), this.pos.getZ() + Math.random(), 0, 0, 0, 0);
-		
-		ParticleHandler.ghostLight(this.pos.getX(), this.pos.getY(), this.pos.getZ(), 5, this.worldObj);
+		VersionUtils.spawnParticle(worldObj, VersionUtils.createVec3(pos)
+				.addVector(Math.random(), Math.random(), Math.random()),
+				VersionUtils.createVec3(0, 0, 0), "enchantment_table");
 
-		AxisAlignedBB bb = new AxisAlignedBB(this.pos, this.pos);
-		
-		if (!this.worldObj.getEntitiesWithinAABB(EntityLiving.class, bb).isEmpty()) {
-			this.script.onExecute(this.worldObj, new Vec3(this.pos.getX(), this.pos.getY(), this.pos.getZ()));
+		ParticleHandler.ghostLight(VersionUtils.createVec3(this.pos), 5,
+				this.worldObj);
+
+		AxisAlignedBB bb = VersionUtils.getAABBFor(this.pos, this.pos);
+
+		if (!this.worldObj.getEntitiesWithinAABB(EntityLiving.class, bb)
+				.isEmpty()) {
+			this.script.onExecute(this.worldObj, new Vec3(this.pos.getX(),
+					this.pos.getY(), this.pos.getZ()));
 		}
 	}
 

@@ -1,4 +1,4 @@
-package com.firegodjr.ancientlanguage.event;
+package com.firegodjr.ancientlanguage.api.script.events;
 
 import java.util.AbstractMap.SimpleEntry;
 import java.util.List;

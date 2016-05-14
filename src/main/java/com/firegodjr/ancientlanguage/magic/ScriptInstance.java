@@ -20,11 +20,11 @@ import com.firegodjr.ancientlanguage.api.magic.IEnergyProducer;
 import com.firegodjr.ancientlanguage.api.script.IModifier;
 import com.firegodjr.ancientlanguage.api.script.IScriptObject;
 import com.firegodjr.ancientlanguage.api.script.ISelector;
-import com.firegodjr.ancientlanguage.api.script.IWardPlacer;
 import com.firegodjr.ancientlanguage.api.script.IWord;
 import com.firegodjr.ancientlanguage.utils.MagicUtils;
 import com.firegodjr.ancientlanguage.utils.ModHooks;
 import com.firegodjr.ancientlanguage.utils.ScriptData;
+import com.firegodjr.ancientlanguage.utils.VersionUtils;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
 
@@ -52,7 +52,7 @@ public final class ScriptInstance {
 	}
 
 	public ScriptInstance(ICommandSender sender, String[] args) {
-		this((Entity)(sender instanceof Entity ? sender : sender.getCommandSenderEntity()), Strings.join(args, " "));
+		this(VersionUtils.getEntity(sender), Strings.join(args, " "));
 	}
 
 	public ScriptInstance(Entity producer, String script) {
@@ -111,8 +111,7 @@ public final class ScriptInstance {
 			String name = Main.getConfig().getNameVersion(word);
 			IScriptObject scriptObj = ScriptRegistry.getInterfaceForString(word);
 			if (!name.isEmpty() && names.contains(name)) this.chantedWords.add(name);
-			else if (scriptObj != null && parsedScript.add(scriptObj) && this.chantedWords.add(word) && scriptObj instanceof IWardPlacer)
-				this.wardWords.add(word);
+			else if (scriptObj != null && parsedScript.add(scriptObj) && this.chantedWords.add(word));
 			else if (names.contains(word)) this.chantedWords.add(word);
 			position = wordEnd;
 		}
@@ -135,11 +134,12 @@ public final class ScriptInstance {
 	public void onExecute(World world, final Vec3 position) {
 		Main.getLogger().info("Executing Parsed Script");
 		List<String> heardWords = Lists.newArrayList();
-		@SuppressWarnings("unchecked")
-		List<Object> selected = world.getPlayers(EntityPlayer.class, new Predicate<EntityPlayer>() {
+		List<Object> selected = VersionUtils.findPlayersIn(world, new Predicate<Object>() {
 			@Override
-			public boolean apply(EntityPlayer input) {
-				return position.squareDistanceTo(input.getPositionVector()) <= 100 && originalScript.indexOf(input.getName()) != -1;
+			public boolean apply(Object input) {
+				if(!(input instanceof EntityPlayer)) return false;
+				EntityPlayer p = (EntityPlayer) input;
+				return position.squareDistanceTo(VersionUtils.getEntityPosition(p)) <= 100 && originalScript.indexOf(p.getName()) != -1;
 			}});
 		if (selected == null) selected = Lists.newArrayList();
 		List<IWord> activeWords = Lists.newArrayList();
@@ -185,6 +185,10 @@ public final class ScriptInstance {
 				for (Object o : selected) {
 					if(o instanceof ICommandSender) {
 						((ICommandSender)o).addChatMessage(new ChatComponentText(
+						EnumChatFormatting.AQUA.toString() + Strings.join(heardWords, " ") +
+						EnumChatFormatting.GRAY + EnumChatFormatting.ITALIC + " echoes in your mind..."));
+					} else if (o instanceof Entity) {
+						((Entity)o).addChatMessage(new ChatComponentText(
 						EnumChatFormatting.AQUA.toString() + Strings.join(heardWords, " ") +
 						EnumChatFormatting.GRAY + EnumChatFormatting.ITALIC + " echoes in your mind..."));
 					}

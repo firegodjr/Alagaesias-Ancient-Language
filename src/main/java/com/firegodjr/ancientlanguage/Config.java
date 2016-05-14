@@ -47,14 +47,15 @@ public class Config {
 	 * Returns a name version of string
 	 */
 	public String getNameVersion(String string) {
-		int sIndex, eIndex;
+		int sIndex, eIndex = -2;
 		for(String s : this.usernameDescovers) {
 			sIndex = string.indexOf(s.charAt(0));
-			eIndex = string.indexOf(s.charAt(1));
-			if(sIndex != -1) {
-				if (s.charAt(1) == 0) return string.substring(sIndex+1, string.length());
+			if (s.length() > 1) eIndex = string.indexOf(s.charAt(1));
+			if (sIndex != -1) {
+				if (eIndex < -1) return string.substring(sIndex+1, string.length());
 				else if (eIndex != -1) return string.substring(sIndex+1, eIndex);
 			}
+			eIndex = -2;
 		}
 		return "";
 	}

@@ -9,8 +9,6 @@ import net.minecraft.entity.item.EntityFallingBlock;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.potion.Potion;
-import net.minecraft.potion.PotionEffect;
-import net.minecraft.util.BlockPos;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumChatFormatting;
@@ -22,6 +20,7 @@ import com.firegodjr.ancientlanguage.api.script.IWord;
 import com.firegodjr.ancientlanguage.blocks.ModBlocks;
 import com.firegodjr.ancientlanguage.magic.MagicData;
 import com.firegodjr.ancientlanguage.utils.BlockPosHit;
+import com.firegodjr.ancientlanguage.utils.VersionUtils;
 
 public class WordAction {
 
@@ -37,7 +36,8 @@ public class WordAction {
 					fatigue++;
 					// Adds "Shield" Effect to selected entities
 					((EntityLivingBase) obj)
-							.addPotionEffect(new PotionEffect(Potion.resistance.id, 1200, 2, true, false));
+							.addPotionEffect(
+									VersionUtils.createEffectNoParticles(Potion.resistance.id, 1200, 2, true));
 				}
 			}
 			energy.performMagic(fatigue * 0.1f); // 10 fatigue here = 100% energy request
@@ -59,10 +59,10 @@ public class WordAction {
 				} else if (obj instanceof BlockPosHit && energy.getActualUser() instanceof Entity) {
 					Entity entity = (Entity) energy.getActualUser();
 					World world = entity.worldObj;
-					BlockPos pos = ((BlockPosHit) obj).pos;
-					fatigue += world.getBlockState(pos).getBlock().getBlockHardness(world, pos) / 4;
+					BlockPosHit pos = (BlockPosHit) obj;
+					fatigue += VersionUtils.getBlockHardness(world, pos) / 4;
 					// Breaks blocks with break word
-					world.destroyBlock(pos, false);
+					VersionUtils.destroyBlock(world, pos, false);
 				}
 			}
 			energy.performMagic(fatigue * 0.2f); // 5 fatigue here = 100% energy request
@@ -115,8 +115,8 @@ public class WordAction {
 					World world = ((Entity) energy.getActualUser()).worldObj;
 					BlockPosHit pos = (BlockPosHit) obj;
 					// Sets block on fire
-					if (world.getBlockState(pos.pos.offset(pos.side)).getBlock() == Blocks.air)
-						world.setBlockState(pos.pos.offset(pos.side), Blocks.fire.getDefaultState());
+					if (VersionUtils.isAirBlock(world, pos))
+						VersionUtils.setBlock(world, pos, Blocks.fire);
 				}
 			}
 			energy.performMagic(fatigue * 0.1f); // 10 fatigue  = 100% energy request
@@ -154,7 +154,8 @@ public class WordAction {
 					fatigue++;
 					// Prevents entities from moving
 					((EntityLivingBase) obj)
-							.addPotionEffect(new PotionEffect(Potion.moveSlowdown.id, 200, 99, true, false));
+							.addPotionEffect(
+									VersionUtils.createEffectNoParticles(Potion.moveSlowdown.id, 200, 99, true));
 				}
 			}
 			energy.performMagic(fatigue * 0.2f); // 5 fatigue = 100% energy request
@@ -173,9 +174,9 @@ public class WordAction {
 					fatigue++;
 					BlockPosHit pos = (BlockPosHit) obj;
 					World world = ((Entity) energy.getActualUser()).worldObj;
-					world.setBlockState(pos.pos, Blocks.air.getDefaultState());
-					EntityFallingBlock blockEntity = new EntityFallingBlock(world, pos.pos.getX() + 0.5,
-							pos.pos.getY() + 0.5, pos.pos.getZ() + 0.5, world.getBlockState(pos.pos));
+					VersionUtils.setAir(world, pos);
+					EntityFallingBlock blockEntity = new EntityFallingBlock(world, pos.getIX() + 0.5,
+							pos.getIY() + 0.5, pos.getIZ() + 0.5, world.getBlockState(pos.getBlockPos()));
 					world.spawnEntityInWorld(blockEntity);
 					blockEntity.setVelocity(0, 100, 0);
 					// Causes blocks to fly upwards
@@ -200,8 +201,8 @@ public class WordAction {
 					BlockPosHit pos = (BlockPosHit) obj;
 					World world = ((Entity) energy.getActualUser()).worldObj;
 					// Creates a ghost/werelight
-					if (world.getBlockState(pos.pos.offset(pos.side)).getBlock() == Blocks.air) {
-						world.setBlockState(pos.pos.offset(pos.side), ModBlocks.ghostLight.getDefaultState());
+					if (VersionUtils.isAirBlock(world, pos)) {
+						VersionUtils.setBlock(world, pos, ModBlocks.ghostLight);
 					}
 				}
 			}
@@ -219,11 +220,17 @@ public class WordAction {
 				if (obj instanceof BlockPosHit && energy.getActualUser() instanceof Entity) {
 					BlockPosHit bph = (BlockPosHit) obj;
 					@SuppressWarnings("unused")
-					Vec3 v = new Vec3(bph.pos.getX(), bph.pos.getY(), bph.pos.getZ());
+					Vec3 v = bph.pos;
 					//WordHandler.placeWard(((Entity) energy.getActualUser()).worldObj, v, energy.getWardlessChant(), 50);
 					return;
 				}
 			}
+		}
+
+		@Override
+		public Entity onWardPlace(MagicData data, Map<String, String> modData,
+				Vec3 position, String scriptToInsert) {
+			return null;
 		}
 	}
 }
